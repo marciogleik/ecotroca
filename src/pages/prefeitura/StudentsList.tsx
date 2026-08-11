@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { Card, CardBody, Table, THead, TBody, Th, Td, Button, Input, LiveIndicator } from '../../components/ui';
-import { Download, Search, ChevronDown, ChevronUp, Recycle } from 'lucide-react';
+import { Download, Search, ChevronDown, ChevronUp, Recycle, Trash2, AlertTriangle, X } from 'lucide-react';
 import { supabase } from '../../lib/supabase';
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
@@ -16,6 +16,11 @@ const StudentsList: React.FC = () => {
   const [expandedStudentId, setExpandedStudentId] = useState<string | null>(null);
   const [studentDeliveries, setStudentDeliveries] = useState<any[]>([]);
   const [deliveriesLoading, setDeliveriesLoading] = useState(false);
+
+  // Modal de exclusão
+  const [studentToDelete, setStudentToDelete] = useState<any | null>(null);
+  const [isDeleting, setIsDeleting] = useState(false);
+  const [deleteSuccess, setDeleteSuccess] = useState<string | null>(null);
 
   const fetchSchools = async () => {
     const { data: result } = await supabase.from('schools').select('id, name').order('name');
@@ -82,6 +87,39 @@ const StudentsList: React.FC = () => {
     }
   };
 
+  const confirmDeleteStudent = async () => {
+    if (!studentToDelete) return;
+    setIsDeleting(true);
+    try {
+      // 1. Delete associated deliveries
+      await supabase
+        .from('deliveries')
+        .delete()
+        .eq('student_id', studentToDelete.id);
+
+      // 2. Delete student
+      const { error } = await supabase
+        .from('students')
+        .delete()
+        .eq('id', studentToDelete.id);
+
+      if (error) throw error;
+
+      setDeleteSuccess(`Aluno(a) "${studentToDelete.name}" foi excluído(a) com sucesso.`);
+      setStudentToDelete(null);
+      fetchData();
+
+      setTimeout(() => {
+        setDeleteSuccess(null);
+      }, 4000);
+    } catch (err: any) {
+      console.error('Error deleting student:', err);
+      alert(`Erro ao excluir aluno: ${err.message || 'Tente novamente.'}`);
+    } finally {
+      setIsDeleting(false);
+    }
+  };
+
   const handleExportCSV = () => {
     if (data.length === 0) return;
     const headers = ['Nome', 'Matricula', 'Escola', 'Ecotrocas'];
@@ -101,6 +139,16 @@ const StudentsList: React.FC = () => {
 
   return (
     <div className="space-y-6">
+      {/* Banner de Sucesso */}
+      {deleteSuccess && (
+        <div className="p-4 bg-emerald-50 border border-emerald-200 rounded-xl text-emerald-900 font-semibold text-sm flex items-center justify-between shadow-sm animate-fade-in">
+          <span>✅ {deleteSuccess}</span>
+          <button onClick={() => setDeleteSuccess(null)} className="text-emerald-700 hover:text-emerald-950">
+            <X className="h-4 w-4" />
+          </button>
+        </div>
+      )}
+
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
           <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-3 items-start">
@@ -152,7 +200,7 @@ const StudentsList: React.FC = () => {
               <Th>Matrícula</Th>
               <Th>Escola</Th>
               <Th>Saldo Atual</Th>
-              <Th className="text-right">Entregas</Th>
+              <Th className="text-right">Ações</Th>
             </THead>
             <TBody>
               {loading ? (
@@ -172,15 +220,26 @@ const StudentsList: React.FC = () => {
                       </div>
                     </Td>
                     <Td className="text-right">
-                      <Button
-                        size="sm"
-                        variant="outline"
-                        roleColor="prefeitura"
-                        onClick={() => handleExpandStudentDeliveries(item.id)}
-                      >
-                        {expandedStudentId === item.id ? <ChevronUp className="h-4 w-4 mr-1" /> : <ChevronDown className="h-4 w-4 mr-1" />}
-                        {expandedStudentId === item.id ? 'Fechar' : 'Ver Lançamentos'}
-                      </Button>
+                      <div className="flex items-center justify-end gap-2">
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          roleColor="prefeitura"
+                          onClick={() => handleExpandStudentDeliveries(item.id)}
+                        >
+                          {expandedStudentId === item.id ? <ChevronUp className="h-4 w-4 mr-1" /> : <ChevronDown className="h-4 w-4 mr-1" />}
+                          {expandedStudentId === item.id ? 'Fechar' : 'Lançamentos'}
+                        </Button>
+
+                        <button
+                          type="button"
+                          onClick={() => setStudentToDelete(item)}
+                          className="p-1.5 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+                          title="Excluir aluno"
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </button>
+                      </div>
                     </Td>
                   </tr>
 
@@ -241,9 +300,54 @@ const StudentsList: React.FC = () => {
           </Table>
         </CardBody>
       </Card>
+
+      {/* ────────────────────── MODAL DE CONFIRMAÇÃO DE EXCLUSÃO ────────────────────── */}
+      {studentToDelete && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm animate-fade-in">
+          <div className="bg-white rounded-2xl max-w-md w-full p-6 shadow-2xl space-y-5 border border-slate-100">
+            <div className="flex items-center gap-3 text-red-600">
+              <div className="p-2.5 bg-red-50 rounded-xl">
+                <AlertTriangle className="h-6 w-6" />
+              </div>
+              <div>
+                <h3 className="text-lg font-bold text-slate-900">Excluir Cadastro do Aluno</h3>
+                <p className="text-xs text-slate-500">Esta ação não poderá ser desfeita.</p>
+              </div>
+            </div>
+
+            <div className="p-4 bg-slate-50 rounded-xl border border-slate-200 text-sm space-y-1">
+              <p><strong>Aluno:</strong> {studentToDelete.name}</p>
+              <p><strong>Matrícula:</strong> {studentToDelete.enrollment || 'Não informada'}</p>
+              <p><strong>Escola:</strong> {studentToDelete.school}</p>
+              <p className="text-xs text-amber-700 font-semibold mt-2">
+                ⚠️ O cadastro do aluno e seu histórico de lançamentos serão removidos do sistema.
+              </p>
+            </div>
+
+            <div className="flex items-center justify-end gap-3 pt-2">
+              <Button
+                variant="outline"
+                onClick={() => setStudentToDelete(null)}
+                disabled={isDeleting}
+              >
+                Cancelar
+              </Button>
+              <Button
+                roleColor="prefeitura"
+                className="bg-red-600 hover:bg-red-700 text-white"
+                onClick={confirmDeleteStudent}
+                disabled={isDeleting}
+              >
+                {isDeleting ? 'Excluindo...' : 'Sim, Excluir Aluno'}
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
 
 export default StudentsList;
+
 
