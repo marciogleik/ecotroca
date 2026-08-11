@@ -9,11 +9,6 @@ Plataforma desenvolvida para gestão do programa municipal de reciclagem, educa�
 - **Sicredi**: Processamento de resgates e pagamento em moeda corrente aos feirantes credenciados.
 - **Prefeitura**: Painel consolidado de monitoramento ambiental, gestão de repasses, relatórios e controle de impacto ecológico.
 
-## 🛠️ Tecnologias Utilizadas
-
-- **Frontend**: React 19, TypeScript, Vite, Tailwind CSS
-- **Backend / Database**: Supabase (PostgreSQL, Auth, Realtime)
-- **Gráficos e Indicadores**: Recharts, Lucide Icons
 
 ## 📜 Licença
 
