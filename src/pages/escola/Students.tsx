@@ -150,21 +150,19 @@ const Students: React.FC = () => {
             <table className="w-full text-left border-collapse">
               <thead>
                 <tr className="bg-gray-50 border-b border-gray-100 text-xs font-bold text-gray-500 uppercase tracking-wider">
-                  <th className="px-4 py-3">Nome</th>
+                  <th className="px-4 py-3">Nome do Aluno</th>
                   <th className="px-4 py-3">Matrícula</th>
-                  <th className="px-4 py-3">Escola</th>
-                  <th className="px-4 py-3">Saldo Atual</th>
+                  <th className="px-4 py-3">Saldo de Ecotrocas</th>
                   <th className="px-4 py-3 text-right">Ações</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-100 bg-white text-sm">
                 {loading ? (
-                  <tr><td colSpan={5} className="text-center py-8 text-gray-400">Carregando alunos...</td></tr>
+                  <tr><td colSpan={4} className="text-center py-8 text-gray-400">Carregando alunos...</td></tr>
                 ) : students.map((student) => (
                   <tr key={student.id} className="hover:bg-gray-50/80 transition-colors">
                     <td className="px-4 py-3.5 font-bold text-gray-900 whitespace-nowrap">{student.name}</td>
                     <td className="px-4 py-3.5 text-gray-600 whitespace-nowrap text-xs font-semibold">{student.enrollment}</td>
-                    <td className="px-4 py-3.5 text-gray-600 whitespace-nowrap text-xs">{student.school}</td>
                     <td className="px-4 py-3.5 whitespace-nowrap">
                       <div className="flex flex-col">
                         <span className="font-extrabold text-escola">{student.ecotrocas} ET</span>
@@ -184,10 +182,11 @@ const Students: React.FC = () => {
                         <button
                           type="button"
                           onClick={() => setStudentToDelete(student)}
-                          className="p-1.5 text-red-600 bg-red-50 hover:bg-red-600 hover:text-white border border-red-200 rounded-lg transition-all shadow-sm"
-                          title="Excluir aluno"
+                          className="inline-flex items-center px-2.5 py-1.5 text-xs font-bold text-red-600 bg-red-50 hover:bg-red-600 hover:text-white border border-red-200 rounded-lg transition-all shadow-sm"
+                          title="Excluir cadastro do aluno"
                         >
-                          <Trash2 className="h-4 w-4" />
+                          <Trash2 className="h-3.5 w-3.5 mr-1" />
+                          Excluir
                         </button>
                       </div>
                     </td>
@@ -195,7 +194,7 @@ const Students: React.FC = () => {
                 ))}
                 {!loading && students.length === 0 && (
                   <tr>
-                    <td colSpan={5} className="text-center py-12 text-gray-500 text-sm">
+                    <td colSpan={4} className="text-center py-12 text-gray-500 text-sm">
                       Nenhum aluno encontrado.
                     </td>
                   </tr>

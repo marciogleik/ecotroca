@@ -238,10 +238,11 @@ const StudentsList: React.FC = () => {
                           <button
                             type="button"
                             onClick={() => setStudentToDelete(item)}
-                            className="p-1.5 text-red-600 bg-red-50 hover:bg-red-600 hover:text-white border border-red-200 rounded-lg transition-all shadow-sm"
+                            className="inline-flex items-center px-2.5 py-1.5 text-xs font-bold text-red-600 bg-red-50 hover:bg-red-600 hover:text-white border border-red-200 rounded-lg transition-all shadow-sm"
                             title="Excluir aluno"
                           >
-                            <Trash2 className="h-4 w-4" />
+                            <Trash2 className="h-3.5 w-3.5 mr-1" />
+                            Excluir
                           </button>
                         </div>
                       </td>
