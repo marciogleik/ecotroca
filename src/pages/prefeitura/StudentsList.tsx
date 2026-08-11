@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Card, CardBody, Table, THead, TBody, Th, Td, Button, Input, LiveIndicator } from '../../components/ui';
+import { Card, CardBody, Button, Input, LiveIndicator } from '../../components/ui';
 import { Download, Search, ChevronDown, ChevronUp, Recycle, Trash2, AlertTriangle, X } from 'lucide-react';
 import { supabase } from '../../lib/supabase';
 import { format } from 'date-fns';
@@ -164,8 +164,8 @@ const StudentsList: React.FC = () => {
       </div>
 
       <Card>
-        <CardBody>
-          <div className="flex flex-col md:flex-row gap-4 mb-6">
+        <CardBody className="p-4 sm:p-6">
+          <div className="flex flex-col sm:flex-row gap-3 mb-6">
             <div className="flex-1">
               <Input
                 placeholder="Buscar aluno por nome ou matrícula..."
@@ -174,7 +174,7 @@ const StudentsList: React.FC = () => {
                 roleColor="prefeitura"
               />
             </div>
-            <div className="w-full md:w-64">
+            <div className="w-full sm:w-64">
               <select
                 className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm font-medium focus:ring-2 focus:ring-prefeitura focus:border-prefeitura bg-white h-[42px]"
                 value={selectedSchool}
@@ -188,116 +188,121 @@ const StudentsList: React.FC = () => {
                 ))}
               </select>
             </div>
-            <Button onClick={fetchData} roleColor="prefeitura" variant="secondary">
+            <Button onClick={fetchData} roleColor="prefeitura" variant="secondary" className="w-full sm:w-auto">
               <Search className="h-5 w-5 mr-2" />
               Buscar
             </Button>
           </div>
 
-          <Table>
-            <THead>
-              <Th>Nome</Th>
-              <Th>Matrícula</Th>
-              <Th>Escola</Th>
-              <Th>Saldo Atual</Th>
-              <Th className="text-right">Ações</Th>
-            </THead>
-            <TBody>
-              {loading ? (
-                <tr><Td colSpan={5} className="text-center py-8">Carregando...</Td></tr>
-              ) : data.length === 0 ? (
-                <tr><Td colSpan={5} className="text-center py-12 text-gray-500">Nenhum aluno encontrado.</Td></tr>
-              ) : data.map((item) => (
-                <React.Fragment key={item.id}>
-                  <tr className="hover:bg-gray-50 transition-colors">
-                    <Td className="font-semibold text-gray-900">{item.name}</Td>
-                    <Td>{item.enrollment}</Td>
-                    <Td>{item.school}</Td>
-                    <Td>
-                      <div className="flex flex-col">
-                        <span className="font-bold text-prefeitura">{(item.ecotrocas || 0)} ET</span>
-                        <span className="text-xs text-gray-500 font-medium">(R$ {(item.ecotrocas || 0).toFixed(2)})</span>
-                      </div>
-                    </Td>
-                    <Td className="text-right">
-                      <div className="flex items-center justify-end gap-2">
-                        <Button
-                          size="sm"
-                          variant="outline"
-                          roleColor="prefeitura"
-                          onClick={() => handleExpandStudentDeliveries(item.id)}
-                        >
-                          {expandedStudentId === item.id ? <ChevronUp className="h-4 w-4 mr-1" /> : <ChevronDown className="h-4 w-4 mr-1" />}
-                          {expandedStudentId === item.id ? 'Fechar' : 'Lançamentos'}
-                        </Button>
-
-                        <button
-                          type="button"
-                          onClick={() => setStudentToDelete(item)}
-                          className="p-1.5 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors"
-                          title="Excluir aluno"
-                        >
-                          <Trash2 className="h-4 w-4" />
-                        </button>
-                      </div>
-                    </Td>
-                  </tr>
-
-                  {/* Linha expandida com entregas do aluno */}
-                  {expandedStudentId === item.id && (
-                    <tr>
-                      <Td colSpan={5} className="bg-slate-50 p-4">
-                        <div className="space-y-3">
-                          <h4 className="text-xs font-bold text-gray-600 uppercase tracking-wider flex items-center gap-1.5">
-                            <Recycle className="h-4 w-4 text-prefeitura" />
-                            Histórico de Lançamentos de Reciclagem — {item.name} ({item.school})
-                          </h4>
-
-                          {deliveriesLoading ? (
-                            <div className="text-center py-4 text-xs text-gray-400">Carregando entregas...</div>
-                          ) : studentDeliveries.length === 0 ? (
-                            <div className="text-center py-4 text-xs text-gray-500">Nenhuma entrega de material registrada para este aluno.</div>
-                          ) : (
-                            <div className="overflow-x-auto bg-white rounded-lg border border-gray-200">
-                              <table className="w-full text-left text-xs border-collapse">
-                                <thead>
-                                  <tr className="border-b border-gray-200 bg-gray-50 text-gray-600 font-semibold uppercase">
-                                    <th className="py-2.5 px-4">Data / Hora</th>
-                                    <th className="py-2.5 px-4">Recicláveis (PET/Tetra/Alum/Plast)</th>
-                                    <th className="py-2.5 px-4">Óleo (L)</th>
-                                    <th className="py-2.5 px-4">ETs Geradas</th>
-                                    <th className="py-2.5 px-4">Recebido Por</th>
-                                  </tr>
-                                </thead>
-                                <tbody className="divide-y divide-gray-100">
-                                  {studentDeliveries.map((del) => (
-                                    <tr key={del.id} className="hover:bg-gray-50/80">
-                                      <td className="py-2.5 px-4 text-gray-600 font-medium whitespace-nowrap">
-                                        {format(new Date(del.created_at), 'dd/MM/yyyy HH:mm', { locale: ptBR })}
-                                      </td>
-                                      <td className="py-2.5 px-4">
-                                        <span className="font-bold text-gray-900">{del.containers || 0} uni</span>
-                                        <span className="text-[10px] text-gray-500 block">
-                                          PET: {del.pet_units || 0} | Tetra: {del.tetra_pak_units || 0} | Lata: {del.aluminum_units || 0} | Plast: {del.plastic_units || 0}
-                                        </span>
-                                      </td>
-                                      <td className="py-2.5 px-4 font-semibold text-gray-800">{del.oil_liters || 0} L</td>
-                                      <td className="py-2.5 px-4 font-black text-emerald-700">+{del.ecotrocas_earned} ET</td>
-                                      <td className="py-2.5 px-4 text-gray-600">{del.received_by || '-'}</td>
-                                    </tr>
-                                  ))}
-                                </tbody>
-                              </table>
-                            </div>
-                          )}
+          <div className="overflow-x-auto border border-gray-100 rounded-xl">
+            <table className="w-full text-left border-collapse">
+              <thead>
+                <tr className="bg-gray-50 border-b border-gray-100 text-xs font-bold text-gray-500 uppercase tracking-wider">
+                  <th className="px-4 py-3">Nome</th>
+                  <th className="px-4 py-3">Matrícula</th>
+                  <th className="px-4 py-3">Escola</th>
+                  <th className="px-4 py-3">Saldo Atual</th>
+                  <th className="px-4 py-3 text-right">Ações</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-gray-100 bg-white text-sm">
+                {loading ? (
+                  <tr><td colSpan={5} className="text-center py-8 text-gray-400">Carregando alunos...</td></tr>
+                ) : data.length === 0 ? (
+                  <tr><td colSpan={5} className="text-center py-12 text-gray-500">Nenhum aluno encontrado.</td></tr>
+                ) : data.map((item) => (
+                  <React.Fragment key={item.id}>
+                    <tr className="hover:bg-gray-50/80 transition-colors">
+                      <td className="px-4 py-3.5 font-bold text-gray-900 whitespace-nowrap">{item.name}</td>
+                      <td className="px-4 py-3.5 text-gray-600 whitespace-nowrap text-xs font-semibold">{item.enrollment}</td>
+                      <td className="px-4 py-3.5 text-gray-600 whitespace-nowrap text-xs">{item.school}</td>
+                      <td className="px-4 py-3.5 whitespace-nowrap">
+                        <div className="flex flex-col">
+                          <span className="font-extrabold text-prefeitura">{(item.ecotrocas || 0)} ET</span>
+                          <span className="text-[11px] text-gray-500 font-medium">(R$ {(item.ecotrocas || 0).toFixed(2)})</span>
                         </div>
-                      </Td>
+                      </td>
+                      <td className="px-4 py-3.5 text-right whitespace-nowrap">
+                        <div className="flex items-center justify-end gap-2">
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            roleColor="prefeitura"
+                            onClick={() => handleExpandStudentDeliveries(item.id)}
+                            className="text-xs py-1.5 px-3"
+                          >
+                            {expandedStudentId === item.id ? <ChevronUp className="h-3.5 w-3.5 mr-1" /> : <ChevronDown className="h-3.5 w-3.5 mr-1" />}
+                            {expandedStudentId === item.id ? 'Fechar' : 'Lançamentos'}
+                          </Button>
+
+                          <button
+                            type="button"
+                            onClick={() => setStudentToDelete(item)}
+                            className="p-1.5 text-red-600 bg-red-50 hover:bg-red-600 hover:text-white border border-red-200 rounded-lg transition-all shadow-sm"
+                            title="Excluir aluno"
+                          >
+                            <Trash2 className="h-4 w-4" />
+                          </button>
+                        </div>
+                      </td>
                     </tr>
-                  )}
-                </React.Fragment>
-              ))}
-            </TBody>
-          </Table>
+
+                    {/* Linha expandida com entregas do aluno */}
+                    {expandedStudentId === item.id && (
+                      <tr>
+                        <td colSpan={5} className="bg-slate-50 p-4 border-b border-gray-100">
+                          <div className="space-y-3">
+                            <h4 className="text-xs font-bold text-gray-600 uppercase tracking-wider flex items-center gap-1.5">
+                              <Recycle className="h-4 w-4 text-prefeitura" />
+                              Histórico de Lançamentos de Reciclagem — {item.name} ({item.school})
+                            </h4>
+
+                            {deliveriesLoading ? (
+                              <div className="text-center py-4 text-xs text-gray-400">Carregando entregas...</div>
+                            ) : studentDeliveries.length === 0 ? (
+                              <div className="text-center py-4 text-xs text-gray-500">Nenhuma entrega de material registrada para este aluno.</div>
+                            ) : (
+                              <div className="overflow-x-auto bg-white rounded-lg border border-gray-200">
+                                <table className="w-full text-left text-xs border-collapse">
+                                  <thead>
+                                    <tr className="border-b border-gray-200 bg-gray-50 text-gray-600 font-semibold uppercase">
+                                      <th className="py-2.5 px-4">Data / Hora</th>
+                                      <th className="py-2.5 px-4">Recicláveis (PET/Tetra/Alum/Plast)</th>
+                                      <th className="py-2.5 px-4">Óleo (L)</th>
+                                      <th className="py-2.5 px-4">ETs Geradas</th>
+                                      <th className="py-2.5 px-4">Recebido Por</th>
+                                    </tr>
+                                  </thead>
+                                  <tbody className="divide-y divide-gray-100">
+                                    {studentDeliveries.map((del) => (
+                                      <tr key={del.id} className="hover:bg-gray-50/80">
+                                        <td className="py-2.5 px-4 text-gray-600 font-medium whitespace-nowrap">
+                                          {format(new Date(del.created_at), 'dd/MM/yyyy HH:mm', { locale: ptBR })}
+                                        </td>
+                                        <td className="py-2.5 px-4">
+                                          <span className="font-bold text-gray-900">{del.containers || 0} uni</span>
+                                          <span className="text-[10px] text-gray-500 block">
+                                            PET: {del.pet_units || 0} | Tetra: {del.tetra_pak_units || 0} | Lata: {del.aluminum_units || 0} | Plast: {del.plastic_units || 0}
+                                          </span>
+                                        </td>
+                                        <td className="py-2.5 px-4 font-semibold text-gray-800">{del.oil_liters || 0} L</td>
+                                        <td className="py-2.5 px-4 font-black text-emerald-700">+{del.ecotrocas_earned} ET</td>
+                                        <td className="py-2.5 px-4 text-gray-600">{del.received_by || '-'}</td>
+                                      </tr>
+                                    ))}
+                                  </tbody>
+                                </table>
+                              </div>
+                            )}
+                          </div>
+                        </td>
+                      </tr>
+                    )}
+                  </React.Fragment>
+                ))}
+              </tbody>
+            </table>
+          </div>
         </CardBody>
       </Card>
 
