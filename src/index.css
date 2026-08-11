@@ -1,0 +1,74 @@
+@import "tailwindcss";
+
+@theme {
+  --color-escola: #0F6E56;
+  --color-escola-dark: #0a4d3c;
+  --color-escola-light: #e7f0ee;
+  
+  --color-sicredi: #185FA5;
+  --color-sicredi-dark: #114476;
+  --color-sicredi-light: #e8eff6;
+  
+  --color-prefeitura: #2c4a8f;
+  --color-prefeitura-dark: #1e3366;
+  --color-prefeitura-light: #e8edf7;
+  
+  --font-sans: "Inter", "system-ui", "sans-serif";
+}
+
+:root {
+  font-family: Inter, system-ui, Avenir, Helvetica, Arial, sans-serif;
+  line-height: 1.5;
+  font-weight: 400;
+
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+body {
+  margin: 0;
+  min-width: 320px;
+  min-height: 100vh;
+  @apply bg-gray-50 text-gray-900;
+}
+
+h1, h2, h3, h4, h5, h6 {
+  @apply font-semibold tracking-tight;
+}
+
+/* Custom scrollbar for a cleaner look */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  @apply bg-transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  @apply bg-gray-300 rounded-full hover:bg-gray-400 transition-colors;
+}
+
+/* Print Rules - Clean A4 page rendering */
+@media print {
+  @page {
+    size: A4 portrait;
+    margin: 15mm 20mm;
+  }
+
+  body {
+    background: white !important;
+    color: black !important;
+  }
+
+  .print\:hidden {
+    display: none !important;
+  }
+
+  .print\:block {
+    display: block !important;
+  }
+}
