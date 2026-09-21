@@ -23,16 +23,36 @@ interface TopSchool {
 }
 
 const ImpactPage: React.FC = () => {
-  const [stats, setStats] = useState({
-    totalStudents: 0,
-    totalVendors: 0,
-    totalIssued: 0,
-    totalContainers: 0,
-    totalOil: 0,
-    totalSchools: 0
+  const [stats, setStats] = useState(() => {
+    const savedStats = localStorage.getItem('ecotroca_impact_stats');
+    if (savedStats) {
+      try {
+        return JSON.parse(savedStats);
+      } catch (e) {
+        console.error('Error parsing stats from localStorage', e);
+      }
+    }
+    return {
+      totalStudents: 243,
+      totalVendors: 22,
+      totalIssued: 13587,
+      totalContainers: 149133,
+      totalOil: 2,
+      totalSchools: 4
+    };
   });
-  const [topSchools, setTopSchools] = useState<TopSchool[]>([]);
-  const [loading, setLoading] = useState(true);
+  
+  const [topSchools, setTopSchools] = useState<TopSchool[]>(() => {
+    const savedTopSchools = localStorage.getItem('ecotroca_impact_topSchools');
+    if (savedTopSchools) {
+      try {
+        return JSON.parse(savedTopSchools);
+      } catch (e) {
+        console.error('Error parsing topSchools from localStorage', e);
+      }
+    }
+    return [];
+  });
 
   const [isMenuOpen, setIsMenuOpen] = useState(false);
 
@@ -59,29 +79,23 @@ const ImpactPage: React.FC = () => {
         const totalContainers = deliveries?.reduce((acc, curr) => acc + (curr.containers || 0), 0) || 0;
         const totalOil = deliveries?.reduce((acc, curr) => acc + (Number(curr.oil_liters) || 0), 0) || 0;
 
-        setTopSchools(topSchoolsData || []);
+        const newTopSchools = topSchoolsData || [];
+        setTopSchools(newTopSchools);
+        localStorage.setItem('ecotroca_impact_topSchools', JSON.stringify(newTopSchools));
 
-
-        setStats({
+        const newStats = {
           totalStudents: studentCount || 0,
           totalVendors: vendorCount || 0,
           totalIssued: totalIssued || 0,
           totalContainers: totalContainers || 0,
           totalOil: totalOil || 0,
           totalSchools: schoolCount || 0
-        });
+        };
+        
+        setStats(newStats);
+        localStorage.setItem('ecotroca_impact_stats', JSON.stringify(newStats));
       } catch (error) {
         console.error('Error fetching public stats:', error);
-        setStats({
-          totalStudents: 1450,
-          totalVendors: 32,
-          totalIssued: 125400,
-          totalContainers: 8940,
-          totalOil: 2310,
-          totalSchools: 8
-        });
-      } finally {
-        setLoading(false);
       }
     };
     fetchPublicStats();
@@ -320,11 +334,7 @@ const ImpactPage: React.FC = () => {
                     </tr>
                   </thead>
                   <tbody>
-                    {loading ? (
-                      <tr>
-                        <td colSpan={3} className="py-8 text-center text-slate-500">Carregando ranking...</td>
-                      </tr>
-                    ) : topSchools.length > 0 ? (
+                    {topSchools.length > 0 ? (
                       topSchools.map((school, index) => (
                         <tr key={school.id} className="border-b border-slate-100 last:border-0 hover:bg-slate-50/80 transition-colors">
                           <td className="py-4 px-6 text-center">

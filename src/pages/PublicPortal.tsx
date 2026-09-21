@@ -27,38 +27,57 @@ import {
 
 const PublicPortal: React.FC = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const [stats, setStats] = useState({
-    totalStudents: 0,
-    totalVendors: 0,
-    totalIssued: 0,
-    totalContainers: 0,
-    totalOil: 0,
-    totalSchools: 0
+  const [stats, setStats] = useState(() => {
+    const savedStats = localStorage.getItem('ecotroca_public_stats');
+    if (savedStats) {
+      try {
+        return JSON.parse(savedStats);
+      } catch (e) {
+        console.error('Error parsing stats from localStorage', e);
+      }
+    }
+    return {
+      totalStudents: 243,
+      totalVendors: 22,
+      totalIssued: 13587,
+      totalContainers: 149133,
+      totalOil: 2,
+      totalSchools: 4
+    };
   });
-  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const fetchPublicStats = async () => {
       try {
-        const { count: studentCount } = await supabase.from('students').select('*', { count: 'exact', head: true });
-        const { count: vendorCount } = await supabase.from('vendors').select('*', { count: 'exact', head: true });
-        const { count: schoolCount } = await supabase.from('schools').select('*', { count: 'exact', head: true });
-        
-        const { data: deliveries } = await supabase.from('deliveries').select('ecotrocas_earned, containers, oil_liters');
-        const { data: schools } = await supabase.from('schools').select('total_received');
+        const [
+          { count: studentCount },
+          { count: vendorCount },
+          { count: schoolCount },
+          { data: deliveries },
+          { data: schools }
+        ] = await Promise.all([
+          supabase.from('students').select('*', { count: 'exact', head: true }),
+          supabase.from('vendors').select('*', { count: 'exact', head: true }),
+          supabase.from('schools').select('*', { count: 'exact', head: true }),
+          supabase.from('deliveries').select('ecotrocas_earned, containers, oil_liters'),
+          supabase.from('schools').select('total_received')
+        ]);
 
         const totalIssued = schools?.reduce((acc, curr) => acc + (curr.total_received || 0), 0) || 0;
         const totalContainers = deliveries?.reduce((acc, curr) => acc + (curr.containers || 0), 0) || 0;
         const totalOil = deliveries?.reduce((acc, curr) => acc + (Number(curr.oil_liters) || 0), 0) || 0;
 
-        setStats({
+        const newStats = {
           totalStudents: studentCount || 0,
           totalVendors: vendorCount || 0,
-          totalIssued: totalIssued || 0,
-          totalContainers: totalContainers || 0,
-          totalOil: totalOil || 0,
+          totalIssued,
+          totalContainers,
+          totalOil,
           totalSchools: schoolCount || 0
-        });
+        };
+        
+        setStats(newStats);
+        localStorage.setItem('ecotroca_public_stats', JSON.stringify(newStats));
       } catch (error) {
         console.error('Error fetching public stats:', error);
         setStats({
@@ -69,8 +88,6 @@ const PublicPortal: React.FC = () => {
           totalOil: 2310,
           totalSchools: 8
         });
-      } finally {
-        setLoading(false);
       }
     };
 
@@ -275,15 +292,15 @@ const PublicPortal: React.FC = () => {
 
               <div className="grid grid-cols-3 gap-6 sm:gap-8 pt-6 max-w-md mx-auto lg:mx-0 border-t border-slate-200/80">
                 <div>
-                  <p className="text-2xl sm:text-3xl font-black text-escola">{loading ? '...' : stats.totalSchools}</p>
+                  <p className="text-2xl sm:text-3xl font-black text-escola">{stats.totalSchools}</p>
                   <p className="text-xs font-semibold text-slate-500 uppercase tracking-wider mt-1">Escolas Ativas</p>
                 </div>
                 <div>
-                  <p className="text-2xl sm:text-3xl font-black text-prefeitura">{loading ? '...' : stats.totalVendors}</p>
+                  <p className="text-2xl sm:text-3xl font-black text-prefeitura">{stats.totalVendors}</p>
                   <p className="text-xs font-semibold text-slate-500 uppercase tracking-wider mt-1">Parceiros</p>
                 </div>
                 <div>
-                  <p className="text-2xl sm:text-3xl font-black text-slate-800">{loading ? '...' : (stats.totalStudents + stats.totalVendors)}</p>
+                  <p className="text-2xl sm:text-3xl font-black text-slate-800">{stats.totalStudents + stats.totalVendors}</p>
                   <p className="text-xs font-semibold text-slate-500 uppercase tracking-wider mt-1">Participantes</p>
                 </div>
               </div>
