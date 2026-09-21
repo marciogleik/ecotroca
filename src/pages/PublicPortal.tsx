@@ -340,21 +340,63 @@ const PublicPortal: React.FC = () => {
 
       {/* ────────────────────── NOTÍCIAS ────────────────────── */}
       <section className="py-16 sm:py-20 bg-white border-y border-slate-200/50">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          <span className="text-xs font-bold text-escola tracking-wider uppercase mb-4 block">Últimas Atualizações</span>
-          <h2 className="text-3xl sm:text-4xl font-extrabold text-slate-900 tracking-tight mb-6">
-            Acompanhe o EcoTroca
-          </h2>
-          <p className="text-slate-500 font-medium leading-relaxed max-w-2xl mx-auto mb-10">
-            Fique por dentro das novidades, eventos, entregas e impacto que o programa está gerando na comunidade.
-          </p>
-          <Link 
-            to="/noticias" 
-            className="inline-flex items-center justify-center px-8 py-4 text-base font-bold text-white bg-escola hover:bg-green-700 rounded-2xl shadow-lg shadow-green-600/20 hover:shadow-xl hover:-translate-y-0.5 transition-all"
-          >
-            Acessar o Portal de Notícias
-            <ArrowRight className="ml-2 h-5 w-5" />
-          </Link>
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center max-w-3xl mx-auto mb-12">
+            <span className="text-xs font-bold text-escola tracking-wider uppercase mb-2 block">Últimas Atualizações</span>
+            <h2 className="text-3xl sm:text-4xl font-extrabold text-slate-900 tracking-tight mb-4">
+              Acompanhe o EcoTroca
+            </h2>
+            <p className="text-slate-500 font-medium leading-relaxed">
+              Fique por dentro das novidades, eventos e do impacto que o programa está gerando na comunidade.
+            </p>
+          </div>
+
+          <div className="max-w-5xl mx-auto bg-slate-50 rounded-3xl p-6 sm:p-8 lg:p-10 border border-slate-100 shadow-sm flex flex-col md:flex-row gap-8 items-center hover:shadow-md transition-shadow">
+            <div className="w-full md:w-2/5 aspect-[4/3] rounded-2xl overflow-hidden relative shadow-sm">
+              <img 
+                src="/news/Ecotroca1.jpeg" 
+                alt="Ação EcoTroca" 
+                className="w-full h-full object-cover transform hover:scale-105 transition-transform duration-700"
+              />
+              <div className="absolute top-4 left-4 bg-white/90 backdrop-blur-sm px-3 py-1 rounded-full text-xs font-bold text-escola shadow-sm">
+                Destaque
+              </div>
+            </div>
+            
+            <div className="w-full md:w-3/5 space-y-5">
+              <div className="flex items-center gap-2 text-sm text-slate-400 font-semibold">
+                <Calendar className="w-4 h-4" />
+                20 de Setembro de 2026
+              </div>
+              
+              <h3 className="text-2xl sm:text-3xl font-black text-slate-900 tracking-tight leading-tight">
+                Mais de 1.000 ecotrocas chegam aos feirantes
+              </h3>
+              
+              <p className="text-slate-600 font-medium leading-relaxed line-clamp-3">
+                Mais de 1.000 ecotrocas foram entregues no domingo aos feirantes, dando continuidade às ações de educação ambiental. Contamos com a participação especial dos alunos da Escola Pestalozzi...
+              </p>
+              
+              <div className="pt-2">
+                <Link 
+                  to="/noticias" 
+                  className="inline-flex items-center text-escola font-bold hover:text-green-700 transition-colors group"
+                >
+                  Continuar lendo
+                  <ArrowRight className="ml-2 h-4 w-4 transform group-hover:translate-x-1 transition-transform" />
+                </Link>
+              </div>
+            </div>
+          </div>
+
+          <div className="mt-12 text-center">
+            <Link 
+              to="/noticias" 
+              className="inline-flex items-center justify-center px-8 py-3.5 text-sm font-bold text-slate-700 bg-white border-2 border-slate-200 hover:border-escola hover:text-escola rounded-xl shadow-sm hover:shadow transition-all"
+            >
+              Ver Todas as Notícias
+            </Link>
+          </div>
         </div>
       </section>
 
