@@ -206,8 +206,9 @@ const ImpactPage: React.FC = () => {
                   <Heart className="h-6 w-6" />
                 </div>
                 <div>
-                  <h3 className="text-4xl sm:text-5xl font-black text-slate-900 mb-2">
-                    {loading ? '...' : familiesImpacted.toLocaleString('pt-BR')}+
+                  <h3 className="text-4xl sm:text-5xl font-black text-slate-900 mb-2 flex items-baseline">
+                    {loading ? '...' : familiesImpacted.toLocaleString('pt-BR')}
+                    <span className="text-2xl font-bold text-slate-600 ml-2">+</span>
                   </h3>
                   <p className="text-lg font-extrabold text-slate-800 mb-2">Famílias Impactadas</p>
                   <p className="text-slate-600 text-sm leading-relaxed">
@@ -249,8 +250,9 @@ const ImpactPage: React.FC = () => {
                   <Recycle className="h-6 w-6" />
                 </div>
                 <div>
-                  <h3 className="text-4xl sm:text-5xl font-black text-slate-900 mb-2">
+                  <h3 className="text-4xl sm:text-5xl font-black text-slate-900 mb-2 flex items-baseline">
                     {loading ? '...' : stats.totalContainers.toLocaleString('pt-BR')}
+                    <span className="text-xl sm:text-2xl font-bold text-green-800 ml-2">unidades</span>
                   </h3>
                   <p className="text-lg font-extrabold text-green-700 mb-2">Embalagens Recicladas</p>
                   <p className="text-slate-600 text-sm leading-relaxed">
