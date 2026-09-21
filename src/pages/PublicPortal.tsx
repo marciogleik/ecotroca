@@ -831,14 +831,19 @@ const PublicPortal: React.FC = () => {
               <div className="inline-flex p-3 rounded-2xl bg-amber-500/10 text-amber-700 mb-6">
                 <Coins className="h-6 w-6" />
               </div>
-              <p className="text-xs font-bold text-slate-400 uppercase tracking-wider">Moeda Social Gerada</p>
+              <p className="text-xs font-bold text-slate-400 uppercase tracking-wider">EcoTrocas em Circulação</p>
               <h3 className="text-3xl font-black text-slate-900 mt-2 flex items-baseline gap-1">
                 {loading ? '...' : stats.totalIssued.toLocaleString('pt-BR')}
                 <span className="text-sm font-bold text-slate-500">EcoTrocas</span>
               </h3>
-              <p className="text-xs font-medium text-slate-500 mt-3 border-t border-slate-100 pt-3">
-                Injetadas no comércio e cooperativas locais — R$ {stats.totalIssued.toLocaleString('pt-BR', {minimumFractionDigits: 2})}.
-              </p>
+              <div className="mt-3 pt-3 border-t border-slate-100 space-y-1">
+                <p className="text-xs font-bold text-escola">
+                  1 EcoTroca = R$ 1,00
+                </p>
+                <p className="text-xs font-medium text-slate-500">
+                  Total de R$ {stats.totalIssued.toLocaleString('pt-BR', {minimumFractionDigits: 2})} injetados no comércio local.
+                </p>
+              </div>
             </div>
 
           </div>
