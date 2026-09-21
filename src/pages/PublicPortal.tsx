@@ -858,19 +858,9 @@ const PublicPortal: React.FC = () => {
             
           </div>
 
-          <div className="flex flex-col sm:flex-row items-center justify-between gap-4 text-xs font-semibold text-slate-500">
-            <p>© {new Date().getFullYear()} Prefeitura Municipal de Água Boa - MT. Todos os direitos reservados.</p>
-            
-            <div className="flex items-center gap-4">
-              <span className="flex items-center gap-1.5">
-                Desenvolvido por
-                <img 
-                  src="/logo-hub.png" 
-                  alt="Hub" 
-                  className="h-5 w-auto object-contain bg-white/5 px-1.5 py-0.5 rounded" 
-                />
-              </span>
-            </div>
+          <div className="flex flex-col items-center justify-center gap-2 text-xs font-semibold text-slate-500 text-center">
+            <p>© {new Date().getFullYear()} Hub de Inovação — Prefeitura de Água Boa</p>
+            <p>Desenvolvimento: Marcio Gleik.</p>
           </div>
         </div>
       </footer>

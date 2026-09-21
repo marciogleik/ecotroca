@@ -9,7 +9,8 @@ import {
   Sun,
   Menu,
   X,
-  ArrowRight
+  ArrowRight,
+  MapPin
 } from 'lucide-react';
 
 const ImpactPage: React.FC = () => {
@@ -273,33 +274,46 @@ const ImpactPage: React.FC = () => {
       {/* ────────────────────── FOOTER ────────────────────── */}
       <footer className="bg-slate-900 text-slate-400 py-16 border-t border-slate-800/80">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-12">
+          <div className="grid grid-cols-1 md:grid-cols-12 gap-12 border-b border-slate-800 pb-12 mb-12">
             
-            <div className="md:col-span-2 space-y-6">
-              <div className="flex items-center gap-4 mb-8">
-                <img src="/logo-prefeitura.png" alt="Prefeitura" className="h-14 bg-white p-1 rounded-lg" />
-                <img src="/logo-hub.png" alt="Inova Água Boa" className="h-14 bg-white p-1 rounded-lg" />
+            <div className="md:col-span-5 space-y-4">
+              <div className="flex items-center gap-3">
+                <img 
+                  src="/logo-prefeitura.png" 
+                  alt="Logo Prefeitura" 
+                  className="h-10 w-auto object-contain bg-white p-1 rounded" 
+                />
+                <span className="text-lg font-black text-white">EcoTroca Água Boa</span>
               </div>
-              <p className="text-sm leading-relaxed max-w-md">
-                O EcoTroca é uma iniciativa da Prefeitura Municipal de Água Boa, desenvolvida pelo HUB Inova Água Boa para promover a sustentabilidade, educação ambiental e desenvolvimento econômico local.
+              <p className="text-sm font-medium leading-relaxed max-w-md">
+                Uma iniciativa da Prefeitura Municipal de Água Boa, Mato Grosso, fomentando a educação ambiental, a economia solidária e a preservação ecológica.
               </p>
             </div>
 
-            <div>
-              <h4 className="text-white font-bold mb-6 tracking-wide uppercase text-sm">Navegação</h4>
-              <ul className="space-y-3 text-sm">
-                <li><Link to="/#noticias" className="hover:text-white transition-colors">Notícias</Link></li>
-                <li><Link to="/#como-funciona" className="hover:text-white transition-colors">Como Funciona</Link></li>
-                <li><Link to="/impacto" className="text-escola font-bold hover:text-green-400 transition-colors">Impacto Acumulado</Link></li>
+            <div className="md:col-span-4 space-y-4">
+              <h4 className="text-sm font-bold text-white uppercase tracking-wider">Acesso Rápido</h4>
+              <ul className="space-y-2 text-sm columns-2">
+                <li><a href="/#noticias" className="hover:text-white transition-colors">Notícias</a></li>
+                <li><a href="/#como-funciona" className="hover:text-white transition-colors">Como Funciona</a></li>
+                <li><Link to="/impacto" className="text-escola font-bold hover:text-green-400 transition-colors">Impacto Ecológico e Social Acumulado</Link></li>
                 <li><Link to="/login" className="hover:text-white transition-colors">Área Restrita</Link></li>
               </ul>
             </div>
 
+            <div className="md:col-span-3 space-y-4">
+              <h4 className="text-sm font-bold text-white uppercase tracking-wider">Contatos</h4>
+              <p className="text-sm leading-relaxed flex items-start gap-2">
+                <MapPin className="h-4 w-4 shrink-0 text-slate-500 mt-0.5" />
+                Av. Planalto, 410 - Centro<br />Água Boa - MT, 78635-000
+              </p>
+              <p className="text-sm">E-mail: contato@aguaboa.mt.gov.br</p>
+            </div>
+            
           </div>
 
-          <div className="mt-16 pt-8 border-t border-slate-800 text-sm flex flex-col sm:flex-row justify-between items-center gap-4">
-            <p>© 2026 Prefeitura de Água Boa - MT. Todos os direitos reservados.</p>
-            <p className="text-slate-500">Desenvolvido com <Heart className="h-4 w-4 inline text-rose-500 mx-1" /> pelo HUB Inova Água Boa</p>
+          <div className="flex flex-col items-center justify-center gap-2 text-xs font-semibold text-slate-500 text-center">
+            <p>© {new Date().getFullYear()} Hub de Inovação — Prefeitura de Água Boa</p>
+            <p>Desenvolvimento: Marcio Gleik.</p>
           </div>
         </div>
       </footer>
