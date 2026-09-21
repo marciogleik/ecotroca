@@ -76,8 +76,32 @@ const ImpactPage: React.FC = () => {
         setLoading(false);
       }
     };
-
     fetchPublicStats();
+
+    // Inscrição para atualizações em tempo real no ranking das escolas
+    const channel = supabase
+      .channel('public:schools')
+      .on(
+        'postgres_changes',
+        { event: '*', schema: 'public', table: 'schools' },
+        async () => {
+          // Quando houver mudança em qualquer escola, busca novamente o top 5 atualizado
+          const { data: topSchoolsData } = await supabase
+            .from('schools')
+            .select('id, name, total_received')
+            .order('total_received', { ascending: false })
+            .limit(5);
+          
+          if (topSchoolsData) {
+            setTopSchools(topSchoolsData);
+          }
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
   }, []);
 
   // Estimate families impacted assuming ~1.5 students per family
@@ -284,7 +308,7 @@ const ImpactPage: React.FC = () => {
                     <tr className="bg-slate-50 border-b border-slate-200">
                       <th className="py-4 px-6 font-bold text-slate-700 w-16 text-center">#</th>
                       <th className="py-4 px-6 font-bold text-slate-700">Escola</th>
-                      <th className="py-4 px-6 font-bold text-slate-700 text-right">Total Arrecadado (R$)</th>
+                      <th className="py-4 px-6 font-bold text-slate-700 text-right">EcoTrocas Arrecadadas</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -303,7 +327,7 @@ const ImpactPage: React.FC = () => {
                           </td>
                           <td className="py-4 px-6 font-semibold text-slate-800">{school.name}</td>
                           <td className="py-4 px-6 font-bold text-[#00A859] text-right">
-                            {school.total_received.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}
+                            {school.total_received.toLocaleString('pt-BR')} <span className="text-sm font-semibold text-slate-500 ml-1">EcoTrocas</span>
                           </td>
                         </tr>
                       ))
