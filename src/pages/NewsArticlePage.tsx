@@ -129,17 +129,17 @@ const NewsArticlePage: React.FC = () => {
 
       <main className="flex-1">
         {/* ────────────────────── HERO ARTICLE ────────────────────── */}
-        <div className="w-full bg-[#F8FAFC] pt-12 pb-8 sm:pb-12 border-b border-slate-200/60">
+        <div className="w-full bg-[#F8FAFC] pt-8 pb-6 sm:pb-8 border-b border-slate-200/60">
           <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
             <Link 
               to="/noticias" 
-              className="inline-flex items-center text-sm font-bold text-slate-500 hover:text-escola mb-8 transition-colors"
+              className="inline-flex items-center text-sm font-bold text-slate-500 hover:text-escola mb-6 transition-colors"
             >
               <ArrowLeft className="mr-2 h-4 w-4" />
               Voltar para Notícias
             </Link>
             
-            <div className="flex flex-wrap items-center gap-3 mb-6">
+            <div className="flex flex-wrap items-center gap-3 mb-4">
               <div className={`inline-flex items-center gap-2 px-4 py-2 rounded-full border shadow-sm ${article.categoryStyle}`}>
                 <span className="text-lg">{article.categoryIcon}</span>
                 <span className="text-xs font-bold uppercase tracking-widest">{article.category}</span>
@@ -150,11 +150,11 @@ const NewsArticlePage: React.FC = () => {
               </div>
             </div>
 
-            <h1 className="text-4xl sm:text-5xl md:text-6xl font-black text-slate-900 tracking-tight leading-tight mb-8">
+            <h1 className="text-3xl sm:text-4xl md:text-5xl font-black text-slate-900 tracking-tight leading-tight mb-6">
               {article.title}
             </h1>
 
-            <div className="aspect-video w-full rounded-3xl overflow-hidden shadow-xl border-4 border-white bg-slate-100">
+            <div className="w-full h-64 sm:h-80 md:h-[400px] rounded-3xl overflow-hidden shadow-xl border-4 border-white bg-slate-100">
               <img 
                 src={article.coverImage} 
                 alt={article.title} 
@@ -165,7 +165,7 @@ const NewsArticlePage: React.FC = () => {
         </div>
 
         {/* ────────────────────── ARTICLE BODY ────────────────────── */}
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-8 pb-16 sm:pt-12 sm:pb-24">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-6 pb-16 sm:pt-8 sm:pb-24">
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-12 lg:gap-16">
             
             <article className="lg:col-span-2">
