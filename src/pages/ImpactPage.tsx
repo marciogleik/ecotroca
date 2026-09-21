@@ -166,9 +166,15 @@ const ImpactPage: React.FC = () => {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           
           <div className="max-w-4xl mx-auto text-center space-y-8 mb-24">
-            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white border border-slate-200 shadow-sm">
-              <Sun className="h-4 w-4 text-amber-500" />
-              <span className="text-xs font-bold text-slate-700 uppercase tracking-widest">Fazendo a Diferença Real</span>
+            <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
+              <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white border border-slate-200 shadow-sm">
+                <Sun className="h-4 w-4 text-amber-500" />
+                <span className="text-xs font-bold text-slate-700 uppercase tracking-widest">Fazendo a Diferença Real</span>
+              </div>
+              <div className="inline-flex items-center gap-3 px-5 py-2 rounded-full bg-green-50 border border-green-200 shadow-sm">
+                <span className="text-xs font-bold text-green-700 uppercase tracking-widest">Patrocínio Oficial:</span>
+                <img src="/sicredi.png" alt="Sicredi" className="h-5 w-auto object-contain" />
+              </div>
             </div>
             
             <h1 className="text-5xl sm:text-6xl lg:text-7xl font-black tracking-tight leading-[1.1] text-slate-900">
@@ -176,7 +182,7 @@ const ImpactPage: React.FC = () => {
             </h1>
             
             <p className="text-xl sm:text-2xl text-slate-600 font-medium leading-relaxed max-w-3xl mx-auto">
-              O EcoTroca não é apenas um programa de reciclagem. É um <strong>movimento social poderoso</strong> que está alimentando famílias, educando crianças e protegendo o meio ambiente.
+              O EcoTroca não é apenas um programa de reciclagem. Com o <strong>apoio financeiro direto do Sicredi</strong>, é um <strong>movimento social poderoso</strong> que alimenta famílias, educa crianças e protege o meio ambiente.
             </p>
           </div>
 
@@ -221,19 +227,22 @@ const ImpactPage: React.FC = () => {
             </div>
 
             {/* Economia Solidária */}
-            <div className="relative group bg-white p-8 sm:p-10 rounded-[2.5rem] border border-slate-100 hover:border-amber-200 shadow-xl shadow-slate-200/40 hover:shadow-2xl hover:shadow-amber-500/10 transition-all duration-500">
-              <div className="absolute -bottom-10 -left-10 w-40 h-40 bg-amber-500/10 rounded-full blur-2xl group-hover:bg-amber-400/20 transition-all duration-500"></div>
+            <div className="relative group bg-white p-8 sm:p-10 rounded-[2.5rem] border border-[#00A859]/20 hover:border-[#00A859]/50 shadow-xl shadow-slate-200/40 hover:shadow-2xl hover:shadow-[#00A859]/20 transition-all duration-500">
+              <div className="absolute -bottom-10 -left-10 w-40 h-40 bg-[#00A859]/10 rounded-full blur-2xl group-hover:bg-[#00A859]/20 transition-all duration-500"></div>
               <div className="relative z-10 space-y-6">
-                <div className="inline-flex p-3 rounded-2xl bg-amber-500/10 text-amber-700">
-                  <Users className="h-8 w-8" />
+                <div className="flex items-center justify-between">
+                  <div className="inline-flex p-3 rounded-2xl bg-[#00A859]/10 text-[#00A859]">
+                    <Users className="h-8 w-8" />
+                  </div>
+                  <img src="/sicredi.png" alt="Sicredi" className="h-6 w-auto object-contain opacity-70 group-hover:opacity-100 transition-opacity" />
                 </div>
                 <div>
                   <h3 className="text-4xl sm:text-5xl font-black text-slate-900 mb-2">
                     R$ {loading ? '...' : stats.totalIssued.toLocaleString('pt-BR', {minimumFractionDigits: 2})}
                   </h3>
-                  <p className="text-xl font-extrabold text-amber-900 mb-2">Injetados na Economia</p>
+                  <p className="text-xl font-extrabold text-[#00A859] mb-2">Injetados na Economia</p>
                   <p className="text-slate-600">
-                    Sendo <strong>1 EcoTroca = R$ 1,00</strong>, fortalecemos diretamente os pequenos agricultores e feirantes do nosso município.
+                    O <strong>Sicredi garante a conversão</strong>: 1 EcoTroca = R$ 1,00. Esse montante fortalece diretamente os pequenos agricultores e feirantes do município.
                   </p>
                 </div>
               </div>
