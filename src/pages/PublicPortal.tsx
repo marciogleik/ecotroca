@@ -771,6 +771,20 @@ const PublicPortal: React.FC = () => {
         </div>
       </section>
 
+      {/* ────────────────────── PARCEIROS ────────────────────── */}
+      <section className="py-16 bg-white border-t border-slate-200/50">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+          <span className="text-xs font-bold text-slate-400 uppercase tracking-widest block mb-8">Apoiadores e Parceiros Oficiais</span>
+          <div className="flex justify-center items-center gap-12">
+            <img 
+              src="/sicredi.png" 
+              alt="Sicredi" 
+              className="h-14 w-auto object-contain grayscale hover:grayscale-0 transition-all duration-300" 
+            />
+          </div>
+        </div>
+      </section>
+
       {/* ────────────────────── FOOTER ────────────────────── */}
       <footer className="bg-slate-900 text-slate-400 py-16 border-t border-slate-800/80">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
