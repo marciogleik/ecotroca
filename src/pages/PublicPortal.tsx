@@ -24,7 +24,6 @@ import {
   ShoppingBasket,
   Ban
 } from 'lucide-react';
-import { LiveIndicator } from '../components/ui';
 
 const PublicPortal: React.FC = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -77,8 +76,6 @@ const PublicPortal: React.FC = () => {
 
     fetchPublicStats();
   }, []);
-
-  const waterPreserved = stats.totalOil * 25000;
 
   const steps = [
     {
@@ -169,14 +166,15 @@ const PublicPortal: React.FC = () => {
               </Link>
             </div>
 
-            {/* Desktop Nav */}
             <nav className="hidden md:flex items-center gap-8">
               <a href="#noticias" className="text-sm font-semibold text-slate-600 hover:text-escola transition-colors">Notícias</a>
               <a href="#como-funciona" className="text-sm font-semibold text-slate-600 hover:text-escola transition-colors">Como Funciona</a>
-              <a href="#materiais" className="text-sm font-semibold text-slate-600 hover:text-escola transition-colors">Materiais</a>
-              <a href="#feiras" className="text-sm font-semibold text-slate-600 hover:text-escola transition-colors">Feiras</a>
-              <a href="#olho-no-oleo" className="text-sm font-semibold text-slate-600 hover:text-escola transition-colors">De Olho no Óleo</a>
-              <a href="#impacto" className="text-sm font-semibold text-slate-600 hover:text-escola transition-colors">Impacto</a>
+              <Link 
+                to="/impacto" 
+                className="text-sm font-bold text-escola hover:text-green-700 transition-colors flex items-center gap-1"
+              >
+                Impacto Ecológico e Social Acumulado
+              </Link>
               <Link 
                 to="/login" 
                 className="inline-flex items-center justify-center px-5 py-2.5 text-sm font-bold text-white bg-prefeitura hover:bg-prefeitura-dark rounded-xl shadow-md shadow-prefeitura/10 hover:shadow-lg transition-all"
@@ -201,24 +199,27 @@ const PublicPortal: React.FC = () => {
         {isMenuOpen && (
           <div className="md:hidden border-b border-slate-100 bg-white">
             <div className="px-2 pt-2 pb-4 space-y-1 sm:px-3">
-              {[
-                ['#noticias', 'Notícias'],
-                ['#como-funciona', 'Como Funciona'],
-                ['#materiais', 'Materiais Aceitos'],
-                ['#feiras', 'Calendário das Feiras'],
-                ['#olho-no-oleo', 'De Olho no Óleo'],
-                ['#impacto', 'Nosso Impacto'],
-                ['#participantes', 'Participantes'],
-              ].map(([href, label]) => (
-                <a
-                  key={href}
-                  href={href}
-                  onClick={() => setIsMenuOpen(false)}
-                  className="block px-4 py-3 rounded-xl text-base font-semibold text-slate-600 hover:bg-slate-50 hover:text-escola transition-colors"
-                >
-                  {label}
-                </a>
-              ))}
+              <a
+                href="#noticias"
+                onClick={() => setIsMenuOpen(false)}
+                className="block px-4 py-3 rounded-xl text-base font-semibold text-slate-600 hover:bg-slate-50 hover:text-escola transition-colors"
+              >
+                Notícias
+              </a>
+              <a
+                href="#como-funciona"
+                onClick={() => setIsMenuOpen(false)}
+                className="block px-4 py-3 rounded-xl text-base font-semibold text-slate-600 hover:bg-slate-50 hover:text-escola transition-colors"
+              >
+                Como Funciona
+              </a>
+              <Link
+                to="/impacto"
+                onClick={() => setIsMenuOpen(false)}
+                className="block px-4 py-3 rounded-xl text-base font-bold text-escola bg-green-50 hover:bg-green-100 transition-colors"
+              >
+                Impacto Ecológico e Social Acumulado
+              </Link>
               <div className="pt-2 px-4">
                 <Link 
                   to="/login" 
@@ -762,103 +763,7 @@ const PublicPortal: React.FC = () => {
         </div>
       </section>
 
-      {/* ────────────────────── IMPACTO ────────────────────── */}
-      <section id="impacto" className="py-20 bg-white">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          
-          <div className="text-center max-w-3xl mx-auto space-y-4 mb-16">
-            <div className="inline-flex items-center gap-2">
-              <LiveIndicator />
-              <span className="text-xs font-bold text-blue-800 tracking-wider uppercase">Indicadores em Tempo Real</span>
-            </div>
-            <h2 className="text-3xl sm:text-4xl font-extrabold text-slate-900 tracking-tight">
-              Impacto Ecológico e Social Acumulado
-            </h2>
-            <p className="text-slate-500 font-medium leading-relaxed text-base sm:text-lg">
-              Veja em tempo real a contribuição sustentável da nossa comunidade.
-            </p>
-          </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
-            
-            <div className="relative group bg-[#F8FAFC] p-8 rounded-3xl border border-slate-100 hover:border-green-200 hover:bg-white hover:shadow-2xl hover:shadow-green-500/5 transition-all duration-300">
-              <div className="absolute top-0 right-0 w-24 h-24 bg-green-500/5 rounded-full blur-xl group-hover:bg-green-500/10 transition-all"></div>
-              <div className="inline-flex p-3 rounded-2xl bg-green-500/10 text-green-700 mb-6">
-                <Recycle className="h-6 w-6" />
-              </div>
-              <p className="text-xs font-bold text-slate-400 uppercase tracking-wider">Materiais Coletados</p>
-              <h3 className="text-3xl font-black text-slate-900 mt-2 flex items-baseline gap-1">
-                {loading ? '...' : stats.totalContainers.toLocaleString('pt-BR')}
-                <span className="text-sm font-bold text-slate-500">und</span>
-              </h3>
-              <p className="text-xs font-medium text-slate-500 mt-3 border-t border-slate-100 pt-3">
-                PET, Tetra Pak, Alumínio e Plásticos descartados corretamente.
-              </p>
-            </div>
-
-            <div className="relative group bg-[#F8FAFC] p-8 rounded-3xl border border-slate-100 hover:border-blue-200 hover:bg-white hover:shadow-2xl hover:shadow-blue-500/5 transition-all duration-300">
-              <div className="absolute top-0 right-0 w-24 h-24 bg-blue-500/5 rounded-full blur-xl group-hover:bg-blue-500/10 transition-all"></div>
-              <div className="inline-flex p-3 rounded-2xl bg-blue-500/10 text-blue-700 mb-6">
-                <Droplets className="h-6 w-6" />
-              </div>
-              <p className="text-xs font-bold text-slate-400 uppercase tracking-wider">Óleo Reciclado</p>
-              <h3 className="text-3xl font-black text-slate-900 mt-2 flex items-baseline gap-1">
-                {loading ? '...' : stats.totalOil.toLocaleString('pt-BR', {maximumFractionDigits: 1})}
-                <span className="text-sm font-bold text-slate-500">litros</span>
-              </h3>
-              <p className="text-xs font-medium text-slate-500 mt-3 border-t border-slate-100 pt-3">
-                Evitou a contaminação de solos e mananciais de água.
-              </p>
-            </div>
-
-            <div className="relative group bg-[#F8FAFC] p-8 rounded-3xl border border-slate-100 hover:border-cyan-200 hover:bg-white hover:shadow-2xl hover:shadow-cyan-500/5 transition-all duration-300">
-              <div className="absolute top-0 right-0 w-24 h-24 bg-cyan-500/5 rounded-full blur-xl group-hover:bg-cyan-500/10 transition-all"></div>
-              <div className="inline-flex p-3 rounded-2xl bg-cyan-500/10 text-cyan-700 mb-6">
-                <Droplets className="h-6 w-6" />
-              </div>
-              <p className="text-xs font-bold text-slate-400 uppercase tracking-wider">Água Preservada</p>
-              <h3 className="text-3xl font-black text-slate-900 mt-2 flex items-baseline gap-1">
-                {loading ? '...' : (waterPreserved / 1000000).toLocaleString('pt-BR', {minimumFractionDigits: 1, maximumFractionDigits: 1})}
-                <span className="text-sm font-bold text-slate-500">M Litros</span>
-              </h3>
-              <p className="text-xs font-medium text-slate-500 mt-3 border-t border-slate-100 pt-3">
-                Volume equivalente a mais de {(waterPreserved / 2500000).toFixed(0)} piscinas olímpicas poupadas.
-              </p>
-            </div>
-
-            <div className="relative group bg-[#F8FAFC] p-8 rounded-3xl border border-slate-100 hover:border-amber-200 hover:bg-white hover:shadow-2xl hover:shadow-amber-500/5 transition-all duration-300">
-              <div className="absolute top-0 right-0 w-24 h-24 bg-amber-500/5 rounded-full blur-xl group-hover:bg-amber-500/10 transition-all"></div>
-              <div className="inline-flex p-3 rounded-2xl bg-amber-500/10 text-amber-700 mb-6">
-                <Coins className="h-6 w-6" />
-              </div>
-              <p className="text-xs font-bold text-slate-400 uppercase tracking-wider">EcoTrocas em Circulação</p>
-              <h3 className="text-3xl font-black text-slate-900 mt-2 flex items-baseline gap-1">
-                {loading ? '...' : stats.totalIssued.toLocaleString('pt-BR')}
-                <span className="text-sm font-bold text-slate-500">EcoTrocas</span>
-              </h3>
-              <div className="mt-3 pt-3 border-t border-slate-100 space-y-1">
-                <p className="text-xs font-bold text-escola">
-                  1 EcoTroca = R$ 1,00
-                </p>
-                <p className="text-xs font-medium text-slate-500">
-                  Total de R$ {stats.totalIssued.toLocaleString('pt-BR', {minimumFractionDigits: 2})} injetados no comércio local.
-                </p>
-              </div>
-            </div>
-
-          </div>
-
-          <div className="mt-12 p-6 rounded-2xl bg-green-50/50 border border-green-100/50 max-w-4xl mx-auto flex items-start gap-4">
-            <Shield className="h-6 w-6 text-green-700 shrink-0 mt-0.5" />
-            <div>
-              <p className="text-sm font-semibold text-green-800 leading-relaxed">
-                <strong>Importância Ecológica:</strong> O descarte inadequado de apenas 1 litro de óleo de cozinha usado pode poluir até 25.000 litros de água potável. O programa EcoTroca remove esse poluente de circulação de forma ativa e rastreável.
-              </p>
-            </div>
-          </div>
-
-        </div>
-      </section>
 
       {/* ────────────────────── CTA COMERCIANTE ────────────────────── */}
       <section id="comercio" className="py-20 bg-[#F8FAFC]">
@@ -937,10 +842,7 @@ const PublicPortal: React.FC = () => {
               <ul className="space-y-2 text-sm columns-2">
                 <li><a href="#noticias" className="hover:text-white transition-colors">Notícias</a></li>
                 <li><a href="#como-funciona" className="hover:text-white transition-colors">Como Funciona</a></li>
-                <li><a href="#materiais" className="hover:text-white transition-colors">Materiais Aceitos</a></li>
-                <li><a href="#feiras" className="hover:text-white transition-colors">Calendário Feiras</a></li>
-                <li><a href="#olho-no-oleo" className="hover:text-white transition-colors">De Olho no Óleo</a></li>
-                <li><a href="#impacto" className="hover:text-white transition-colors">Impacto Geral</a></li>
+                <li><Link to="/impacto" className="text-escola font-bold hover:text-green-400 transition-colors">Impacto Ecológico e Social Acumulado</Link></li>
                 <li><Link to="/login" className="hover:text-white transition-colors">Área Restrita</Link></li>
               </ul>
             </div>
