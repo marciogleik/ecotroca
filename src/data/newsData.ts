@@ -22,7 +22,7 @@ export const newsData: NewsItem[] = [
     categoryStyle: 'bg-green-50 text-green-700 border-green-100',
     categoryIcon: '🌱',
     excerpt: 'Mais de 1.000 ecotrocas foram entregues no domingo aos feirantes, dando continuidade às ações de educação ambiental e sustentabilidade desenvolvidas em nosso município. Contamos com a participação especial dos alunos da Escola Pestalozzi.',
-    coverImage: '/news/Ecotroca1.jpeg',
+    coverImage: '/news/Ecotroca5.jpeg',
     content: [
       'Mais de <strong>1.000 ecotrocas</strong> foram entregues no domingo, 20/09/2026, aos feirantes, dando continuidade às ações de educação ambiental e sustentabilidade desenvolvidas em nosso município.',
       'Nesta etapa, contamos com a participação especial dos <strong>alunos da Escola Pestalozzi</strong>, que estiveram presentes na entrega e ajudaram a levar adiante essa iniciativa.',
