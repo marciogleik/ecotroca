@@ -129,7 +129,7 @@ const NewsArticlePage: React.FC = () => {
 
       <main className="flex-1">
         {/* ────────────────────── HERO ARTICLE ────────────────────── */}
-        <div className="w-full bg-[#F8FAFC] pt-12 pb-20 border-b border-slate-200/60">
+        <div className="w-full bg-[#F8FAFC] pt-12 pb-8 sm:pb-12 border-b border-slate-200/60">
           <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
             <Link 
               to="/noticias" 
@@ -165,7 +165,7 @@ const NewsArticlePage: React.FC = () => {
         </div>
 
         {/* ────────────────────── ARTICLE BODY ────────────────────── */}
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 sm:py-24">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-8 pb-16 sm:pt-12 sm:pb-24">
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-12 lg:gap-16">
             
             <article className="lg:col-span-2">
