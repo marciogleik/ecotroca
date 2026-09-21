@@ -8,11 +8,12 @@ function cn(...inputs: ClassValue[]) {
 }
 import { Users, Coins, TrendingUp, History, UserPlus, PlusCircle } from 'lucide-react';
 import { supabase } from '../../lib/supabase';
-import { format, subDays } from 'date-fns';
+import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
 import { AlertCircle, School as SchoolIcon } from 'lucide-react';
+import { getCurrentFortnight } from '../../utils/fortnight';
 
 const EscolaDashboard: React.FC = () => {
   const { schoolId } = useAuth();
@@ -61,22 +62,23 @@ const EscolaDashboard: React.FC = () => {
       // 4. EcoTrocas geradas apenas pelos alunos desta escola
       const { data: deliveriesData } = studentIds.length > 0
         ? await supabase
-            .from('deliveries')
-            .select('ecotrocas_earned, student_id')
-            .in('student_id', studentIds)
+          .from('deliveries')
+          .select('ecotrocas_earned, student_id')
+          .in('student_id', studentIds)
         : { data: [] };
 
       const totalEcotrocas = deliveriesData?.reduce((acc, curr) => acc + curr.ecotrocas_earned, 0) || 0;
       const activeStudents = new Set(deliveriesData?.map(d => d.student_id)).size;
 
-      // 4b. Embalagens e EcoTrocas geradas nesta quinzena (pool coletivo)
-      const fortStart = subDays(new Date(), 15).toISOString();
+      // 4b. Embalagens e EcoTrocas geradas nesta quinzena civil (pool coletivo)
+      const { startDateIso, endDateIso } = getCurrentFortnight();
       const { data: fortnightData } = studentIds.length > 0
         ? await supabase
-            .from('deliveries')
-            .select('ecotrocas_earned, containers')
-            .in('student_id', studentIds)
-            .gte('created_at', fortStart)
+          .from('deliveries')
+          .select('ecotrocas_earned, containers')
+          .in('student_id', studentIds)
+          .gte('created_at', startDateIso)
+          .lte('created_at', endDateIso)
         : { data: [] };
 
       const fortnightEcotrocas = fortnightData?.reduce((acc, curr) => acc + curr.ecotrocas_earned, 0) || 0;
@@ -93,11 +95,11 @@ const EscolaDashboard: React.FC = () => {
       // 5. Entregas recentes apenas desta escola
       const { data: recent } = studentIds.length > 0
         ? await supabase
-            .from('deliveries')
-            .select('*')
-            .in('student_id', studentIds)
-            .order('created_at', { ascending: false })
-            .limit(5)
+          .from('deliveries')
+          .select('*')
+          .in('student_id', studentIds)
+          .order('created_at', { ascending: false })
+          .limit(5)
         : { data: [] };
 
       setRecentDeliveries(recent || []);
@@ -125,6 +127,7 @@ const EscolaDashboard: React.FC = () => {
 
   if (loading) return <div className="animate-pulse space-y-4">...</div>;
 
+  const currentFortnight = getCurrentFortnight();
   const maxFortnightPool = stats.totalStudents * 80; // pool em embalagens (N alunos × 80)
   const poolPct = Math.min(100, maxFortnightPool > 0 ? (stats.fortnightContainers / maxFortnightPool) * 100 : 0);
 
@@ -156,16 +159,16 @@ const EscolaDashboard: React.FC = () => {
           <Card className={cn(
             "border-2",
             school.current_balance < 0 ? "border-amber-300 bg-amber-50" :
-            school.current_balance === 0 ? "border-red-200 bg-red-50" : 
-            school.current_balance < 50 ? "border-amber-200 bg-amber-50" : "border-escola/20 bg-escola/5"
+              school.current_balance === 0 ? "border-red-200 bg-red-50" :
+                school.current_balance < 50 ? "border-amber-200 bg-amber-50" : "border-escola/20 bg-escola/5"
           )}>
             <div className="p-6">
               <div className="flex items-center justify-between mb-4">
                 <div className={cn(
                   "p-2 rounded-lg",
                   school.current_balance < 0 ? "bg-amber-100 text-amber-700" :
-                  school.current_balance === 0 ? "bg-red-100 text-red-600" :
-                  school.current_balance < 50 ? "bg-amber-100 text-amber-700" : "bg-escola-light text-escola"
+                    school.current_balance === 0 ? "bg-red-100 text-red-600" :
+                      school.current_balance < 50 ? "bg-amber-100 text-amber-700" : "bg-escola-light text-escola"
                 )}>
                   <SchoolIcon className="h-6 w-6" />
                 </div>
@@ -200,13 +203,13 @@ const EscolaDashboard: React.FC = () => {
                   <p className={cn(
                     "text-3xl font-black mt-1",
                     school.current_balance === 0 ? "text-red-700" :
-                    school.current_balance < 50 ? "text-amber-700" : "text-escola"
+                      school.current_balance < 50 ? "text-amber-700" : "text-escola"
                   )}>
                     {school.current_balance} <span className="text-sm font-normal">ET</span>
                   </p>
                   {school.current_balance < 50 && (
                     <p className="text-xs mt-2 font-medium text-gray-600">
-                      {school.current_balance === 0 
+                      {school.current_balance === 0
                         ? "Estoque esgotado. Solicite a entrega de novas cédulas (verdinhos) à Prefeitura."
                         : "Estoque de verdinhos baixo. Solicite novas cédulas à Prefeitura em breve."}
                     </p>
@@ -216,54 +219,60 @@ const EscolaDashboard: React.FC = () => {
             </div>
           </Card>
 
-          <StatCard 
-            label="Total Lançado" 
-            value={`${school.total_distributed} ET`} 
-            icon={Coins} 
+          <StatCard
+            label="Total Lançado"
+            value={`${school.total_distributed} ET`}
+            icon={Coins}
             roleColor="escola"
-            subtitle="Lançado aos alunos da escola" 
+            subtitle="Lançado aos alunos da escola"
           />
-          
-          <StatCard 
-            label="Total Recebido" 
-            value={`${school.total_received} ET`} 
-            icon={TrendingUp} 
+
+          <StatCard
+            label="Total Recebido"
+            value={`${school.total_received} ET`}
+            icon={TrendingUp}
             roleColor="escola"
-            subtitle="Entregue pela Prefeitura" 
+            subtitle="Entregue pela Prefeitura"
           />
         </div>
       )}
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <StatCard 
-          label="Total de Alunos" 
-          value={stats.totalStudents} 
-          icon={Users} 
-          roleColor="escola" 
+        <StatCard
+          label="Total de Alunos"
+          value={stats.totalStudents}
+          icon={Users}
+          roleColor="escola"
         />
-        <StatCard 
-          label="Alunos Ativos" 
-          value={stats.activeStudents} 
-          icon={TrendingUp} 
-          roleColor="escola" 
+        <StatCard
+          label="Alunos Ativos"
+          value={stats.activeStudents}
+          icon={TrendingUp}
+          roleColor="escola"
         />
         {stats.totalStudents > 0 && (
           <div className="bg-white rounded-xl border border-gray-200 p-5 shadow-sm">
-            <p className="text-sm font-medium text-gray-500 mb-1">Pool Quinzenal (Embalagens)</p>
+            <div className="flex items-center justify-between mb-1">
+              <p className="text-sm font-medium text-gray-500">Volume da Quinzena</p>
+              <span className="text-[10px] font-semibold bg-escola/10 text-escola px-2 py-0.5 rounded-full border border-escola/20">
+                {currentFortnight.label}
+              </span>
+            </div>
             <p className="text-2xl font-black text-escola">
               {stats.fortnightContainers}{' '}
               <span className="text-sm font-normal text-gray-400">/ {maxFortnightPool} emb.</span>
             </p>
-            <div className="mt-3 w-full bg-gray-100 rounded-full h-2">
+            <div className="mt-3 w-full bg-gray-100 rounded-full h-2 overflow-hidden">
               <div
-                className={`h-2 rounded-full transition-all duration-500 ${
-                  poolPct >= 100 ? 'bg-red-500' : poolPct >= 80 ? 'bg-yellow-500' : 'bg-escola'
-                }`}
+                className={`h-2 rounded-full transition-all duration-500 ${poolPct >= 100 ? 'bg-emerald-500' : poolPct >= 80 ? 'bg-amber-500' : 'bg-escola'
+                  }`}
                 style={{ width: `${poolPct}%` }}
               />
             </div>
             <p className="text-xs text-gray-400 mt-2">
-              Pool coletivo: {stats.totalStudents} alunos × 80 = {maxFortnightPool} emb./quinzena
+              {poolPct >= 100
+                ? '★ Cota base da quinzena alcançada! Lançamentos liberados'
+                : `Cota base: ${stats.totalStudents} alunos × 80 = ${maxFortnightPool} emb./quinzena`}
             </p>
           </div>
         )}
@@ -272,8 +281,8 @@ const EscolaDashboard: React.FC = () => {
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
         <div className="lg:col-span-2">
           <Card>
-            <CardHeader 
-              title="Entregas Recentes" 
+            <CardHeader
+              title="Entregas Recentes"
               subtitle="Últimas 5 movimentações de materiais"
               icon={History}
               iconColor="bg-escola-light text-escola"
@@ -318,7 +327,7 @@ const EscolaDashboard: React.FC = () => {
             </CardBody>
           </Card>
         </div>
-        
+
         <div>
           <Card className="h-full">
             <CardHeader title="Ações Rápidas" />
@@ -336,8 +345,8 @@ const EscolaDashboard: React.FC = () => {
                   <span className="text-escola font-bold">2 L = 1 ET</span>
                 </div>
               </div>
-              <p className="text-xs text-gray-400 italic">
-                * Pool coletivo quinzenal: {stats.totalStudents} alunos × 80 = <strong>{stats.totalStudents * 80}</strong> embalagens / {stats.totalStudents} alunos × 4L = <strong>{stats.totalStudents * 4}L</strong> de óleo. Alunos que trazem mais usam a cota dos que não participaram.
+              <p className="text-xs text-gray-400 leading-relaxed italic">
+                * Cota coletiva da escola ({currentFortnight.label}): {stats.totalStudents} alunos × 80 = <strong>{stats.totalStudents * 80}</strong> embalagens / {stats.totalStudents} alunos × 4L = <strong>{stats.totalStudents * 4}L</strong> de óleo. Alunos que trazem mais utilizam a cota dos que não participaram. Lançamentos são contínuos e nunca bloqueados.
               </p>
             </CardBody>
           </Card>

@@ -3,7 +3,7 @@ import { Card, CardHeader, CardBody, Button, Input, LiveIndicator } from '../../
 import { 
   School, Search, Edit2, X, CheckCircle, PackageCheck, History, UserCheck, 
   FileText, ArrowUpRight, ArrowDownRight, Printer, Users, Trash2, ChevronDown, 
-  ChevronUp, Recycle
+  ChevronUp, Recycle, Wallet, Landmark, PlusCircle, AlertCircle, Receipt, Coins
 } from 'lucide-react';
 import { supabase } from '../../lib/supabase';
 import { toast } from 'react-hot-toast';
@@ -25,6 +25,24 @@ const SchoolManagement: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [allocating, setAllocating] = useState(false);
   const [selectedSchool, setSelectedSchool] = useState<any | null>(null);
+
+  // Cash Box (Caixa Central de Cédulas / Sicredi) state
+  const [cashEntries, setCashEntries] = useState<any[]>([]);
+  const [totalCashIn, setTotalCashIn] = useState(0);
+  const [totalAllocatedToSchools, setTotalAllocatedToSchools] = useState(0);
+  const [cashBalance, setCashBalance] = useState(0);
+  const [showCashModal, setShowCashModal] = useState(false);
+  const [showCashHistoryModal, setShowCashHistoryModal] = useState(false);
+  const [cashHistoryTab, setCashHistoryTab] = useState<'entries' | 'unified'>('entries');
+
+  // New cash entry form state
+  const [cashAmount, setCashAmount] = useState<string>('');
+  const [cashSource, setCashSource] = useState<string>('Sicredi (Retirada na agência)');
+  const [cashDate, setCashDate] = useState<string>(format(new Date(), 'yyyy-MM-dd'));
+  const [cashReceivedBy, setCashReceivedBy] = useState<string>('Leidiane / Prefeitura');
+  const [cashReceiptNumber, setCashReceiptNumber] = useState<string>('');
+  const [cashNotes, setCashNotes] = useState<string>('');
+  const [savingCashEntry, setSavingCashEntry] = useState(false);
   
   // Delivery form state
   const [amount, setAmount] = useState<string>('');
@@ -90,9 +108,37 @@ const SchoolManagement: React.FC = () => {
     }
   };
 
+  const fetchCashData = async () => {
+    try {
+      const { data: entries, error: entriesErr } = await supabase
+        .from('prefeitura_cash_entries')
+        .select('*')
+        .order('entry_date', { ascending: false });
+
+      if (entriesErr) throw entriesErr;
+      setCashEntries(entries || []);
+
+      const totalIn = entries?.reduce((sum, item) => sum + (item.amount || 0), 0) || 0;
+
+      const { data: allocs, error: allocErr } = await supabase
+        .from('school_allocations')
+        .select('amount');
+
+      if (allocErr) throw allocErr;
+      const totalOut = allocs?.reduce((sum, item) => sum + (item.amount || 0), 0) || 0;
+
+      setTotalCashIn(totalIn);
+      setTotalAllocatedToSchools(totalOut);
+      setCashBalance(totalIn - totalOut);
+    } catch (err) {
+      console.error('Error fetching cash data:', err);
+    }
+  };
+
   useEffect(() => {
     fetchSchools();
     fetchAllocationsHistory();
+    fetchCashData();
 
     const channel = supabase
       .channel('schools-changes')
@@ -103,6 +149,10 @@ const SchoolManagement: React.FC = () => {
       .on('postgres_changes', { event: '*', schema: 'public', table: 'school_allocations' }, () => {
         fetchSchools();
         fetchAllocationsHistory();
+        fetchCashData();
+      })
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'prefeitura_cash_entries' }, () => {
+        fetchCashData();
       })
       .subscribe();
 
@@ -110,6 +160,60 @@ const SchoolManagement: React.FC = () => {
       supabase.removeChannel(channel);
     };
   }, []);
+
+  const handleCreateCashEntry = async (e: React.FormEvent) => {
+    e.preventDefault();
+    const val = parseInt(cashAmount);
+    if (isNaN(val) || val <= 0) {
+      toast.error('Informe uma quantidade válida de Ecotrocas.');
+      return;
+    }
+
+    setSavingCashEntry(true);
+    try {
+      const { error } = await supabase
+        .from('prefeitura_cash_entries')
+        .insert([{
+          amount: val,
+          source: cashSource.trim() || 'Sicredi',
+          entry_date: cashDate || format(new Date(), 'yyyy-MM-dd'),
+          received_by: cashReceivedBy.trim() || 'Leidiane / Prefeitura',
+          receipt_number: cashReceiptNumber.trim() || null,
+          notes: cashNotes.trim() || null
+        }]);
+
+      if (error) throw error;
+
+      toast.success(`🎉 ${val} Ecotrocas adicionadas ao Caixa da Prefeitura!`);
+      setCashAmount('');
+      setCashReceiptNumber('');
+      setCashNotes('');
+      setShowCashModal(false);
+      fetchCashData();
+    } catch (err: any) {
+      console.error('Error saving cash entry:', err);
+      toast.error(err.message || 'Erro ao registrar entrada no caixa.');
+    } finally {
+      setSavingCashEntry(false);
+    }
+  };
+
+  const handleDeleteCashEntry = async (id: string) => {
+    if (!window.confirm('Tem certeza que deseja remover esta entrada de caixa? O saldo do caixa da Prefeitura será recalculado.')) return;
+
+    try {
+      const { error } = await supabase
+        .from('prefeitura_cash_entries')
+        .delete()
+        .eq('id', id);
+
+      if (error) throw error;
+      toast.success('Entrada de caixa removida com sucesso!');
+      fetchCashData();
+    } catch (err: any) {
+      toast.error(err.message || 'Erro ao remover entrada de caixa.');
+    }
+  };
 
   const handleAllocate = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -155,6 +259,7 @@ const SchoolManagement: React.FC = () => {
       setOperationType('add');
       fetchSchools();
       fetchAllocationsHistory();
+      fetchCashData();
     } catch (error: any) {
       console.error('Error allocating ecotrocas:', error);
       toast.error(error.message || 'Erro ao realizar operação');
@@ -213,6 +318,7 @@ const SchoolManagement: React.FC = () => {
       toast.success('Registro de repasse removido com sucesso!');
       fetchSchools();
       fetchAllocationsHistory();
+      fetchCashData();
     } catch (error: any) {
       console.error('Error deleting allocation:', error);
       toast.error(error.message || 'Erro ao remover registro');
@@ -301,16 +407,105 @@ const SchoolManagement: React.FC = () => {
           <p className="text-gray-500 mt-1">Registre a entrega de cédulas de Ecotroca ("verdinhos") para cada escola e controle os estoques.</p>
         </div>
 
-        {schools.length > 0 && !selectedSchool && (
+        <div className="flex flex-wrap items-center gap-3">
           <Button
-            roleColor="prefeitura"
-            onClick={() => setSelectedSchool(schools[0])}
-            className="shrink-0"
+            type="button"
+            variant="outline"
+            onClick={() => setShowCashModal(true)}
+            className="border-emerald-300 text-emerald-800 hover:bg-emerald-50 bg-emerald-50/50 shadow-2xs font-bold"
           >
-            <PackageCheck className="h-5 w-5 mr-2" />
-            Registrar Entrega de Verdinhos
+            <Landmark className="h-4 w-4 mr-1.5 text-emerald-600" />
+            + Entrada do Sicredi
           </Button>
-        )}
+
+          {schools.length > 0 && !selectedSchool && (
+            <Button
+              roleColor="prefeitura"
+              onClick={() => setSelectedSchool(schools[0])}
+              className="shrink-0 font-bold"
+            >
+              <PackageCheck className="h-4 w-4 mr-1.5" />
+              Entregar para Escola
+            </Button>
+          )}
+        </div>
+      </div>
+
+      {/* Card Central do Caixa da Prefeitura */}
+      <div className="bg-gradient-to-br from-emerald-50/90 via-white to-blue-50/40 border border-emerald-200/80 shadow-sm rounded-2xl p-5">
+        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 border-b border-emerald-100 pb-4">
+          <div className="flex items-center gap-3">
+            <div className="p-3 bg-emerald-600 text-white rounded-xl shadow-sm">
+              <Wallet className="h-6 w-6" />
+            </div>
+            <div>
+              <div className="flex flex-wrap items-center gap-2">
+                <h2 className="text-lg font-bold text-gray-900">Caixa Central de Cédulas (Prefeitura)</h2>
+                <span className="text-[11px] bg-emerald-100 text-emerald-800 font-semibold px-2 py-0.5 rounded-full border border-emerald-200">
+                  Controle de Custódia • Gestão
+                </span>
+              </div>
+              <p className="text-xs text-gray-500 mt-0.5">
+                Controle das cédulas físicas retiradas no Sicredi prontas para distribuição às escolas
+              </p>
+            </div>
+          </div>
+
+          <div className="flex items-center gap-2 w-full sm:w-auto">
+            <button
+              type="button"
+              onClick={() => setShowCashHistoryModal(true)}
+              className="inline-flex items-center px-3 py-2 text-xs font-semibold text-gray-700 bg-white hover:bg-gray-50 border border-gray-200 rounded-lg shadow-2xs transition-all"
+            >
+              <Receipt className="h-4 w-4 mr-1.5 text-gray-500" />
+              Extrato do Caixa
+            </button>
+            <button
+              type="button"
+              onClick={() => setShowCashModal(true)}
+              className="inline-flex items-center px-4 py-2 text-xs font-bold text-white bg-emerald-600 hover:bg-emerald-700 rounded-lg shadow-sm transition-all"
+            >
+              <PlusCircle className="h-4 w-4 mr-1.5" />
+              + Entrada do Sicredi
+            </button>
+          </div>
+        </div>
+
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 pt-4">
+          <div className="bg-white/90 p-4 rounded-xl border border-emerald-100/80 shadow-2xs">
+            <div className="flex justify-between items-center text-xs font-semibold text-gray-500">
+              <span>SALDO ATUAL EM CAIXA</span>
+              <span className="p-1 bg-emerald-50 rounded text-emerald-600"><Coins className="h-3.5 w-3.5" /></span>
+            </div>
+            <div className="mt-1 flex items-baseline gap-2">
+              <span className="text-2xl font-black text-emerald-700">{cashBalance.toLocaleString('pt-BR')} ET</span>
+              <span className="text-xs font-medium text-gray-500">(R$ {cashBalance.toLocaleString('pt-BR')},00)</span>
+            </div>
+            <p className="text-[11px] text-gray-500 mt-1">Disponível em mãos com a Prefeitura</p>
+          </div>
+
+          <div className="bg-white/90 p-4 rounded-xl border border-emerald-100/80 shadow-2xs">
+            <div className="flex justify-between items-center text-xs font-semibold text-gray-500">
+              <span>TOTAL RETIRADO (SICREDI)</span>
+              <span className="p-1 bg-blue-50 rounded text-blue-600"><Landmark className="h-3.5 w-3.5" /></span>
+            </div>
+            <div className="mt-1 flex items-baseline gap-2">
+              <span className="text-2xl font-black text-blue-800">{totalCashIn.toLocaleString('pt-BR')} ET</span>
+            </div>
+            <p className="text-[11px] text-gray-500 mt-1">{cashEntries.length} lote(s) recebido(s)</p>
+          </div>
+
+          <div className="bg-white/90 p-4 rounded-xl border border-emerald-100/80 shadow-2xs">
+            <div className="flex justify-between items-center text-xs font-semibold text-gray-500">
+              <span>REPASSADO ÀS ESCOLAS</span>
+              <span className="p-1 bg-amber-50 rounded text-amber-600"><School className="h-3.5 w-3.5" /></span>
+            </div>
+            <div className="mt-1 flex items-baseline gap-2">
+              <span className="text-2xl font-black text-gray-800">{totalAllocatedToSchools.toLocaleString('pt-BR')} ET</span>
+            </div>
+            <p className="text-[11px] text-gray-500 mt-1">Distribuído para {schools.length} escolas</p>
+          </div>
+        </div>
       </div>
 
       {/* Painel de edição de escola */}
@@ -714,10 +909,14 @@ const SchoolManagement: React.FC = () => {
                   </div>
 
                   {/* Card de Saldo Atual e Previsto */}
-                  <div className="p-3 bg-prefeitura/5 rounded-xl border border-prefeitura/20 space-y-1 text-sm">
+                  <div className="p-3 bg-prefeitura/5 rounded-xl border border-prefeitura/20 space-y-2 text-sm">
                     <div className="flex justify-between items-center text-xs text-gray-600">
-                      <span>Saldo em Estoque Atual:</span>
+                      <span>Saldo em Estoque Atual da Escola:</span>
                       <span className="font-bold text-gray-900">{selectedSchool.current_balance} ET</span>
+                    </div>
+                    <div className="flex justify-between items-center text-xs text-emerald-800 bg-emerald-50/80 p-1.5 rounded-md border border-emerald-200/60">
+                      <span>Saldo no Caixa da Prefeitura:</span>
+                      <span className="font-bold">{cashBalance} ET</span>
                     </div>
                     {amount && !isNaN(parseInt(amount)) && parseInt(amount) > 0 && (
                       <div className="flex justify-between items-center pt-1 border-t border-prefeitura/10 font-semibold text-xs">
@@ -726,6 +925,16 @@ const SchoolManagement: React.FC = () => {
                       </div>
                     )}
                   </div>
+
+                  {/* Aviso informativo se o valor for maior que o caixa da prefeitura */}
+                  {operationType === 'add' && amount && parseInt(amount) > cashBalance && (
+                    <div className="p-2.5 bg-amber-50 border border-amber-200 rounded-lg text-xs text-amber-800 flex items-start gap-2">
+                      <AlertCircle className="h-4 w-4 text-amber-600 shrink-0 mt-0.5" />
+                      <span>
+                        <strong>Aviso:</strong> A quantidade informada ({amount} ET) é superior ao saldo registrado em caixa ({cashBalance} ET). A entrega será registrada normalmente, mas lembre-se de cadastrar a retirada do Sicredi no caixa.
+                      </span>
+                    </div>
+                  )}
 
                   <Input
                     label={operationType === 'add' ? 'Quantidade de Verdinhos Entregues' : 'Quantidade a Retirar'}
@@ -945,7 +1154,299 @@ const SchoolManagement: React.FC = () => {
       </Card>
       </div> {/* Fim do bloco print:hidden */}
 
-      {/* Modal de Pré-visualização na Tela (Oculto ao Imprimir) */}
+      {/* Modal: Registrar Entrada de Cédulas no Caixa */}
+      {showCashModal && (
+        <div className="fixed inset-0 z-50 bg-black/50 backdrop-blur-xs flex items-center justify-center p-4 overflow-y-auto">
+          <div className="bg-white rounded-2xl max-w-lg w-full p-6 shadow-2xl border border-gray-100 animate-in fade-in zoom-in-95 duration-150">
+            <div className="flex justify-between items-start pb-4 border-b border-gray-100">
+              <div className="flex items-center gap-3">
+                <div className="p-2.5 bg-emerald-100 text-emerald-700 rounded-xl">
+                  <Landmark className="h-6 w-6" />
+                </div>
+                <div>
+                  <h3 className="text-lg font-bold text-gray-900">Registrar Entrada de Cédulas</h3>
+                  <p className="text-xs text-gray-500">Adicione os verdinhos pegos no Sicredi ao Caixa da Prefeitura</p>
+                </div>
+              </div>
+              <button
+                type="button"
+                onClick={() => setShowCashModal(false)}
+                className="text-gray-400 hover:text-gray-600 p-1 rounded-lg hover:bg-gray-100"
+              >
+                <X className="h-5 w-5" />
+              </button>
+            </div>
+
+            <form onSubmit={handleCreateCashEntry} className="space-y-4 pt-4">
+              <div>
+                <label className="block text-xs font-bold text-gray-700 mb-1">
+                  Quantidade de Ecotrocas (ET) <span className="text-red-500">*</span>
+                </label>
+                <Input
+                  type="number"
+                  required
+                  min="1"
+                  placeholder="Ex: 1850"
+                  value={cashAmount}
+                  onChange={(e) => setCashAmount(e.target.value)}
+                  roleColor="prefeitura"
+                  autoFocus
+                />
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <div>
+                  <label className="block text-xs font-bold text-gray-700 mb-1">Origem do Lote</label>
+                  <select
+                    value={cashSource}
+                    onChange={(e) => setCashSource(e.target.value)}
+                    className="w-full text-sm rounded-lg border border-gray-300 p-2.5 bg-white focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
+                  >
+                    <option value="Sicredi (Retirada na agência)">Sicredi (Retirada na agência)</option>
+                    <option value="Saldo Inicial / Em mãos">Saldo Inicial / Em mãos</option>
+                    <option value="Gráfica / Nova Impressão">Gráfica / Nova Impressão</option>
+                    <option value="Devolução de Escola">Devolução de Escola</option>
+                    <option value="Outro">Outro</option>
+                  </select>
+                </div>
+
+                <div>
+                  <label className="block text-xs font-bold text-gray-700 mb-1">Data do Recebimento</label>
+                  <input
+                    type="date"
+                    required
+                    value={cashDate}
+                    onChange={(e) => setCashDate(e.target.value)}
+                    className="w-full text-sm rounded-lg border border-gray-300 p-2.5 bg-white focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
+                  />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <div>
+                  <label className="block text-xs font-bold text-gray-700 mb-1">Responsável pelo Recebimento</label>
+                  <Input
+                    value={cashReceivedBy}
+                    onChange={(e) => setCashReceivedBy(e.target.value)}
+                    placeholder="Ex: Leidiane / Prefeitura"
+                    roleColor="prefeitura"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-xs font-bold text-gray-700 mb-1">Nº Comprovante / Envelope (opcional)</label>
+                  <Input
+                    value={cashReceiptNumber}
+                    onChange={(e) => setCashReceiptNumber(e.target.value)}
+                    placeholder="Ex: Termo 12/2026"
+                    roleColor="prefeitura"
+                  />
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-xs font-bold text-gray-700 mb-1">Observações (opcional)</label>
+                <Input
+                  value={cashNotes}
+                  onChange={(e) => setCashNotes(e.target.value)}
+                  placeholder="Ex: Cédulas retiradas com o gerente Sicredi para reposição escolar"
+                  roleColor="prefeitura"
+                />
+              </div>
+
+              {/* Pré-visualização do saldo */}
+              <div className="p-3 bg-emerald-50/70 border border-emerald-200 rounded-xl text-xs space-y-1">
+                <div className="flex justify-between text-gray-600">
+                  <span>Saldo atual em caixa:</span>
+                  <span className="font-bold text-gray-800">{cashBalance} ET</span>
+                </div>
+                {parseInt(cashAmount) > 0 && (
+                  <div className="flex justify-between text-emerald-800 font-semibold pt-1 border-t border-emerald-200/60">
+                    <span>Novo saldo após confirmação:</span>
+                    <span className="font-extrabold text-sm">{cashBalance + parseInt(cashAmount)} ET</span>
+                  </div>
+                )}
+              </div>
+
+              <div className="flex justify-end gap-2 pt-2">
+                <Button
+                  type="button"
+                  variant="ghost"
+                  onClick={() => setShowCashModal(false)}
+                >
+                  Cancelar
+                </Button>
+                <Button
+                  type="submit"
+                  disabled={savingCashEntry}
+                  className="bg-emerald-600 hover:bg-emerald-700 text-white"
+                >
+                  <CheckCircle className="h-4 w-4 mr-1.5" />
+                  {savingCashEntry ? 'Salvando...' : 'Confirmar Entrada'}
+                </Button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* Modal: Extrato de Movimentações do Caixa */}
+      {showCashHistoryModal && (
+        <div className="fixed inset-0 z-50 bg-black/50 backdrop-blur-xs flex items-center justify-center p-4 overflow-y-auto">
+          <div className="bg-white rounded-2xl max-w-3xl w-full p-6 shadow-2xl border border-gray-100 max-h-[90vh] flex flex-col animate-in fade-in zoom-in-95 duration-150">
+            <div className="flex justify-between items-start pb-4 border-b border-gray-100">
+              <div className="flex items-center gap-3">
+                <div className="p-2.5 bg-prefeitura/10 text-prefeitura rounded-xl">
+                  <Receipt className="h-6 w-6" />
+                </div>
+                <div>
+                  <h3 className="text-lg font-bold text-gray-900">Extrato de Movimentações do Caixa</h3>
+                  <p className="text-xs text-gray-500">Histórico de lotes retirados no Sicredi e conciliação com as escolas</p>
+                </div>
+              </div>
+              <button
+                type="button"
+                onClick={() => setShowCashHistoryModal(false)}
+                className="text-gray-400 hover:text-gray-600 p-1 rounded-lg hover:bg-gray-100"
+              >
+                <X className="h-5 w-5" />
+              </button>
+            </div>
+
+            <div className="py-4 flex flex-wrap gap-4 justify-between items-center bg-gray-50 p-3 rounded-xl my-3 text-xs">
+              <div>
+                <span className="text-gray-500 block">Total Entradas (Sicredi):</span>
+                <strong className="text-sm font-bold text-emerald-700">{totalCashIn} ET</strong>
+              </div>
+              <div>
+                <span className="text-gray-500 block">Total Repasses (Escolas):</span>
+                <strong className="text-sm font-bold text-gray-800">{totalAllocatedToSchools} ET</strong>
+              </div>
+              <div>
+                <span className="text-gray-500 block">Saldo Atual em Caixa:</span>
+                <strong className="text-sm font-black text-prefeitura">{cashBalance} ET</strong>
+              </div>
+            </div>
+
+            {/* Tabs */}
+            <div className="flex border-b border-gray-200 mb-3 text-xs font-semibold">
+              <button
+                type="button"
+                onClick={() => setCashHistoryTab('entries')}
+                className={`py-2 px-4 border-b-2 transition-all ${
+                  cashHistoryTab === 'entries'
+                    ? 'border-emerald-600 text-emerald-700 font-bold'
+                    : 'border-transparent text-gray-500 hover:text-gray-700'
+                }`}
+              >
+                Entradas de Cédulas ({cashEntries.length})
+              </button>
+              <button
+                type="button"
+                onClick={() => setCashHistoryTab('unified')}
+                className={`py-2 px-4 border-b-2 transition-all ${
+                  cashHistoryTab === 'unified'
+                    ? 'border-prefeitura text-prefeitura font-bold'
+                    : 'border-transparent text-gray-500 hover:text-gray-700'
+                }`}
+              >
+                Linha do Tempo Unificada
+              </button>
+            </div>
+
+            <div className="flex-1 overflow-y-auto pr-1 space-y-2">
+              {cashHistoryTab === 'entries' ? (
+                cashEntries.length === 0 ? (
+                  <div className="text-center py-10 text-gray-400 text-sm">
+                    Nenhuma entrada de cédulas registrada ainda.<br />
+                    Clique em <strong>+ Entrada do Sicredi</strong> para lançar o primeiro lote.
+                  </div>
+                ) : (
+                  cashEntries.map((entry) => (
+                    <div key={entry.id} className="p-3 bg-white border border-gray-200 rounded-xl hover:border-emerald-300 transition-all flex justify-between items-center text-xs">
+                      <div>
+                        <div className="flex items-center gap-2">
+                          <span className="font-bold text-sm text-emerald-700">+{entry.amount} ET</span>
+                          <span className="bg-emerald-50 text-emerald-800 font-medium px-2 py-0.5 rounded text-[10px] border border-emerald-100">
+                            {entry.source}
+                          </span>
+                          {entry.receipt_number && (
+                            <span className="text-gray-500 text-[10px]">Doc: {entry.receipt_number}</span>
+                          )}
+                        </div>
+                        <p className="text-gray-500 mt-0.5">
+                          Data: <strong>{format(new Date(entry.entry_date + 'T12:00:00'), 'dd/MM/yyyy')}</strong>
+                          {entry.received_by && ` • Resp: ${entry.received_by}`}
+                          {entry.notes && ` • Obs: "${entry.notes}"`}
+                        </p>
+                      </div>
+                      <button
+                        type="button"
+                        onClick={() => handleDeleteCashEntry(entry.id)}
+                        className="p-1.5 text-gray-400 hover:text-red-600 rounded-lg hover:bg-red-50 transition-all"
+                        title="Excluir entrada"
+                      >
+                        <Trash2 className="h-4 w-4" />
+                      </button>
+                    </div>
+                  ))
+                )
+              ) : (
+                /* Linha do tempo unificada */
+                <div className="space-y-2">
+                  {[
+                    ...cashEntries.map(e => ({
+                      id: e.id,
+                      date: e.entry_date,
+                      timestamp: new Date(e.entry_date + 'T12:00:00').getTime(),
+                      type: 'in',
+                      amount: e.amount,
+                      title: `Entrada: ${e.source}`,
+                      sub: `Resp: ${e.received_by || 'Leidiane'} ${e.receipt_number ? `• Doc: ${e.receipt_number}` : ''}`
+                    })),
+                    ...history.map(h => ({
+                      id: h.id,
+                      date: h.created_at,
+                      timestamp: new Date(h.created_at).getTime(),
+                      type: 'out',
+                      amount: h.amount,
+                      title: `Repasse: ${h.schools?.name || 'Escola'}`,
+                      sub: `Entregue por: ${h.delivered_by || 'Prefeitura'} • Recebido por: ${h.received_by || 'Escola'}`
+                    }))
+                  ]
+                    .sort((a, b) => b.timestamp - a.timestamp)
+                    .map(item => (
+                      <div key={item.id} className="p-3 bg-white border border-gray-200 rounded-xl flex justify-between items-center text-xs">
+                        <div className="flex items-center gap-3">
+                          <span className={`p-1.5 rounded-lg ${item.type === 'in' ? 'bg-emerald-100 text-emerald-700' : 'bg-blue-100 text-blue-700'}`}>
+                            {item.type === 'in' ? <Landmark className="h-4 w-4" /> : <School className="h-4 w-4" />}
+                          </span>
+                          <div>
+                            <p className="font-bold text-gray-900">{item.title}</p>
+                            <p className="text-gray-500 text-[11px] mt-0.5">
+                              {format(new Date(item.date), 'dd/MM/yyyy')} • {item.sub}
+                            </p>
+                          </div>
+                        </div>
+                        <span className={`font-bold text-sm ${item.type === 'in' ? 'text-emerald-700' : 'text-gray-800'}`}>
+                          {item.type === 'in' ? `+${item.amount} ET` : `-${Math.abs(item.amount)} ET`}
+                        </span>
+                      </div>
+                    ))}
+                </div>
+              )}
+            </div>
+
+            <div className="pt-4 border-t border-gray-100 flex justify-end">
+              <Button variant="ghost" onClick={() => setShowCashHistoryModal(false)}>
+                Fechar
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Modal de Impressão do Recibo */}
       {printableAllocation && (
         <div className="print:hidden fixed inset-0 bg-slate-900/70 backdrop-blur-sm z-50 flex items-center justify-center p-4 sm:p-6 overflow-y-auto">
           {/* Floating Controls Bar */}

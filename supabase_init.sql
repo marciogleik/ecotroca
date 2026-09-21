@@ -79,6 +79,18 @@ CREATE TABLE public.sicredi_budget (
   updated_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL
 );
 
+-- 9. Create prefeitura_cash_entries table for managing cash box (verdinhos from Sicredi)
+CREATE TABLE public.prefeitura_cash_entries (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  amount INTEGER NOT NULL CHECK (amount > 0),
+  source TEXT NOT NULL DEFAULT 'Sicredi',
+  entry_date DATE NOT NULL DEFAULT CURRENT_DATE,
+  receipt_number TEXT,
+  received_by TEXT DEFAULT 'Leidiane / Prefeitura',
+  notes TEXT,
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL
+);
+
 -- Row Level Security (RLS) - Disabled for development
 ALTER TABLE public.profiles DISABLE ROW LEVEL SECURITY;
 ALTER TABLE public.schools DISABLE ROW LEVEL SECURITY;
@@ -88,6 +100,7 @@ ALTER TABLE public.deliveries DISABLE ROW LEVEL SECURITY;
 ALTER TABLE public.school_allocations DISABLE ROW LEVEL SECURITY;
 ALTER TABLE public.redemptions DISABLE ROW LEVEL SECURITY;
 ALTER TABLE public.sicredi_budget DISABLE ROW LEVEL SECURITY;
+ALTER TABLE public.prefeitura_cash_entries DISABLE ROW LEVEL SECURITY;
 
 -- Function to handle new user creation
 CREATE OR REPLACE FUNCTION public.handle_new_user()

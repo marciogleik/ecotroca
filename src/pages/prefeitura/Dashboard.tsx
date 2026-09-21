@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { StatCard, Card, CardHeader, CardBody, LiveIndicator } from '../../components/ui';
-import { BarChart3, Users, Coins, Recycle, Droplets, Download } from 'lucide-react';
+import { BarChart3, Users, Coins, Recycle, Droplets, Download, Wallet } from 'lucide-react';
 import { supabase } from '../../lib/supabase';
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip, Legend } from 'recharts';
 
@@ -11,7 +11,9 @@ const PrefeituraDashboard: React.FC = () => {
     totalIssued: 0,
     totalRedeemed: 0,
     totalContainers: 0,
-    totalOil: 0
+    totalOil: 0,
+    totalCashIn: 0,
+    cashBalance: 0
   });
   const [loading, setLoading] = useState(true);
 
@@ -23,8 +25,11 @@ const PrefeituraDashboard: React.FC = () => {
       const { data: deliveries } = await supabase.from('deliveries').select('ecotrocas_earned, containers, oil_liters');
       const { data: redemptions } = await supabase.from('redemptions').select('quantity');
       const { data: schools } = await supabase.from('schools').select('total_received');
+      const { data: cashEntries } = await supabase.from('prefeitura_cash_entries').select('amount');
 
       const totalIssued = schools?.reduce((acc, curr) => acc + (curr.total_received || 0), 0) || 0;
+      const totalCashIn = cashEntries?.reduce((acc, curr) => acc + (curr.amount || 0), 0) || 0;
+      const cashBalance = totalCashIn - totalIssued;
       const totalContainers = deliveries?.reduce((acc, curr) => acc + (curr.containers || 0), 0) || 0;
       const totalOil = deliveries?.reduce((acc, curr) => acc + (Number(curr.oil_liters) || 0), 0) || 0;
       const totalRedeemed = redemptions?.reduce((acc, curr) => acc + curr.quantity, 0) || 0;
@@ -35,7 +40,9 @@ const PrefeituraDashboard: React.FC = () => {
         totalIssued,
         totalRedeemed,
         totalContainers,
-        totalOil
+        totalOil,
+        totalCashIn,
+        cashBalance
       });
     } catch (error) {
       console.error('Error fetching prefeitura data:', error);
@@ -55,6 +62,7 @@ const PrefeituraDashboard: React.FC = () => {
       .on('postgres_changes', { event: '*', schema: 'public', table: 'redemptions' }, () => fetchData())
       .on('postgres_changes', { event: '*', schema: 'public', table: 'schools' }, () => fetchData())
       .on('postgres_changes', { event: '*', schema: 'public', table: 'school_allocations' }, () => fetchData())
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'prefeitura_cash_entries' }, () => fetchData())
       .subscribe();
 
     return () => {
@@ -87,7 +95,14 @@ const PrefeituraDashboard: React.FC = () => {
         </button>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
+        <StatCard
+          label="Em Caixa (Prefeitura)"
+          value={`${stats.cashBalance} ET`}
+          icon={Wallet}
+          roleColor="prefeitura"
+          subtitle={`Retirado: ${stats.totalCashIn} | Repassado: ${stats.totalIssued}`}
+        />
         <StatCard
           label="Entregue às Escolas"
           value={`${stats.totalIssued} ET`}
@@ -107,7 +122,7 @@ const PrefeituraDashboard: React.FC = () => {
           value={`${inCirculation} ET`}
           icon={Coins}
           roleColor="prefeitura"
-          subtitle={`Entregue às Escolas (${stats.totalIssued}) − Resgatados (${stats.totalRedeemed})`}
+          subtitle={`Escolas (${stats.totalIssued}) − Resgatados (${stats.totalRedeemed})`}
         />
         <StatCard
           label="Participantes"

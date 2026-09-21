@@ -8,9 +8,11 @@ import { supabase } from '../../lib/supabase';
 import { useAuth } from '../../contexts/AuthContext';
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
+import { getCurrentFortnight } from '../../utils/fortnight';
 
 const EscolaReports: React.FC = () => {
   const { schoolId } = useAuth();
+  const currentFortnight = getCurrentFortnight();
   const [activeTab, setActiveTab] = useState<'deliveries' | 'allocations' | 'rankings' | 'association_coleta'>('deliveries');
   const [school, setSchool] = useState<any>(null);
   const [loading, setLoading] = useState(true);
@@ -112,10 +114,9 @@ const EscolaReports: React.FC = () => {
       setStartDate(past.toISOString().split('T')[0]);
       setEndDate(todayStr);
     } else if (preset === 'fortnight') {
-      const past = new Date();
-      past.setDate(past.getDate() - 15);
-      setStartDate(past.toISOString().split('T')[0]);
-      setEndDate(todayStr);
+      const fortnight = getCurrentFortnight();
+      setStartDate(fortnight.startIsoDateString);
+      setEndDate(fortnight.endIsoDateString);
     } else if (preset === 'month') {
       const past = new Date();
       past.setDate(past.getDate() - 30);
@@ -537,7 +538,7 @@ const EscolaReports: React.FC = () => {
                 onClick={() => handlePresetDate('fortnight')}
                 className="px-3 py-1 text-xs font-semibold rounded-full border border-escola/30 text-escola font-bold bg-escola/5 hover:bg-escola/10 transition-all"
               >
-                Esta Quinzena (15d)
+                Esta Quinzena ({currentFortnight.label})
               </button>
               <button
                 type="button"
