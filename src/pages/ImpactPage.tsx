@@ -196,22 +196,22 @@ const ImpactPage: React.FC = () => {
             </h1>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 lg:gap-8 max-w-6xl mx-auto">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 lg:gap-8 max-w-6xl mx-auto">
             
             {/* Familias */}
-            <div className="col-span-1 md:col-span-2 lg:col-span-2 relative group bg-white p-8 sm:p-12 rounded-[2.5rem] border border-slate-100 hover:border-rose-200 shadow-xl shadow-slate-200/40 hover:shadow-2xl hover:shadow-rose-500/10 transition-all duration-500">
+            <div className="relative group bg-white p-6 sm:p-8 rounded-[2rem] border border-slate-100 hover:border-rose-200 shadow-lg shadow-slate-200/40 hover:shadow-2xl hover:-translate-y-2 hover:shadow-rose-500/10 transition-all duration-300 cursor-default">
               <div className="absolute top-0 right-0 w-32 h-32 bg-rose-500/5 rounded-full blur-2xl group-hover:bg-rose-500/10 transition-all duration-500"></div>
-              <div className="relative z-10 flex flex-col justify-between h-full space-y-8">
-                <div className="inline-flex p-4 rounded-2xl bg-rose-500/10 text-rose-600 self-start">
-                  <Heart className="h-8 w-8" />
+              <div className="relative z-10 flex flex-col justify-between h-full space-y-6">
+                <div className="inline-flex p-3 rounded-2xl bg-rose-500/10 text-rose-600 self-start transform group-hover:scale-110 group-hover:rotate-3 transition-transform duration-300">
+                  <Heart className="h-6 w-6" />
                 </div>
                 <div>
-                  <h3 className="text-5xl sm:text-6xl font-black text-slate-900 mb-4">
+                  <h3 className="text-4xl sm:text-5xl font-black text-slate-900 mb-2">
                     {loading ? '...' : familiesImpacted.toLocaleString('pt-BR')}+
                   </h3>
-                  <p className="text-2xl font-extrabold text-slate-800 mb-2">Famílias Impactadas</p>
-                  <p className="text-slate-600 text-lg leading-relaxed">
-                    Através do esforço de <strong>{loading ? '...' : stats.totalStudents} crianças</strong> nas escolas, alimentos frescos chegam diretamente à mesa de quem precisa, promovendo saúde e economia doméstica.
+                  <p className="text-lg font-extrabold text-slate-800 mb-2">Famílias Impactadas</p>
+                  <p className="text-slate-600 text-sm leading-relaxed">
+                    Esforço de <strong>{loading ? '...' : stats.totalStudents} crianças</strong> levando alimento fresco para quem precisa.
                   </p>
                 </div>
               </div>
@@ -220,45 +220,43 @@ const ImpactPage: React.FC = () => {
 
 
             {/* Economia Solidária */}
-            <div className="relative group bg-white p-8 sm:p-10 rounded-[2.5rem] border border-[#00A859]/20 hover:border-[#00A859]/50 shadow-xl shadow-slate-200/40 hover:shadow-2xl hover:shadow-[#00A859]/20 transition-all duration-500">
+            <div className="relative group bg-white p-6 sm:p-8 rounded-[2rem] border border-[#00A859]/20 hover:border-[#00A859]/50 shadow-lg shadow-slate-200/40 hover:shadow-2xl hover:-translate-y-2 hover:shadow-[#00A859]/20 transition-all duration-300 cursor-default">
               <div className="absolute -bottom-10 -left-10 w-40 h-40 bg-[#00A859]/10 rounded-full blur-2xl group-hover:bg-[#00A859]/20 transition-all duration-500"></div>
-              <div className="relative z-10 space-y-6">
+              <div className="relative z-10 flex flex-col justify-between h-full space-y-6">
                 <div className="flex items-center justify-between">
-                  <div className="inline-flex p-3 rounded-2xl bg-[#00A859]/10 text-[#00A859]">
-                    <Users className="h-8 w-8" />
+                  <div className="inline-flex p-3 rounded-2xl bg-[#00A859]/10 text-[#00A859] transform group-hover:scale-110 group-hover:-rotate-3 transition-transform duration-300">
+                    <Users className="h-6 w-6" />
                   </div>
-                  <img src="/sicredi.png" alt="Sicredi" className="h-6 w-auto object-contain opacity-70 group-hover:opacity-100 transition-opacity" />
+                  <img src="/sicredi.png" alt="Sicredi" className="h-5 w-auto object-contain opacity-70 group-hover:opacity-100 transition-opacity" />
                 </div>
                 <div>
                   <h3 className="text-4xl sm:text-5xl font-black text-slate-900 mb-2">
-                    R$ {loading ? '...' : stats.totalIssued.toLocaleString('pt-BR', {minimumFractionDigits: 2})}
+                    R$ {loading ? '...' : (stats.totalIssued / 1000).toLocaleString('pt-BR', {maximumFractionDigits: 0})}k
                   </h3>
-                  <p className="text-xl font-extrabold text-[#00A859] mb-2">Injetados na Economia</p>
-                  <p className="text-slate-600">
-                    O <strong>Sicredi garante a conversão</strong>: 1 EcoTroca = R$ 1,00. Esse montante fortalece diretamente os pequenos agricultores e feirantes do município.
+                  <p className="text-lg font-extrabold text-[#00A859] mb-2">Injetados na Economia</p>
+                  <p className="text-slate-600 text-sm leading-relaxed">
+                    Conversão garantida 1x1. Fortalecendo pequenos agricultores e feirantes.
                   </p>
                 </div>
               </div>
             </div>
 
             {/* Reciclagem */}
-            <div className="col-span-1 md:col-span-2 lg:col-span-2 relative group bg-white p-8 sm:p-12 rounded-[2.5rem] border border-slate-100 hover:border-green-200 shadow-xl shadow-slate-200/40 hover:shadow-2xl hover:shadow-green-500/10 transition-all duration-500 flex flex-col md:flex-row items-center gap-10 text-center md:text-left">
-              <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-64 h-64 bg-green-500/5 rounded-full blur-3xl group-hover:bg-green-500/10 transition-all duration-700"></div>
-              
-              <div className="relative z-10 shrink-0">
-                <div className="inline-flex p-6 rounded-[2rem] bg-green-500/10 text-green-700 shadow-sm">
-                  <Recycle className="h-16 w-16" />
+            <div className="relative group bg-white p-6 sm:p-8 rounded-[2rem] border border-slate-100 hover:border-green-200 shadow-lg shadow-slate-200/40 hover:shadow-2xl hover:-translate-y-2 hover:shadow-green-500/10 transition-all duration-300 cursor-default">
+              <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-48 h-48 bg-green-500/5 rounded-full blur-3xl group-hover:bg-green-500/10 transition-all duration-700"></div>
+              <div className="relative z-10 flex flex-col justify-between h-full space-y-6">
+                <div className="inline-flex p-3 rounded-2xl bg-green-500/10 text-green-700 self-start transform group-hover:scale-110 group-hover:rotate-12 transition-transform duration-300">
+                  <Recycle className="h-6 w-6" />
                 </div>
-              </div>
-              
-              <div className="relative z-10">
-                <h3 className="text-5xl sm:text-6xl font-black text-slate-900 mb-4">
-                  {loading ? '...' : stats.totalContainers.toLocaleString('pt-BR')}
-                </h3>
-                <p className="text-2xl font-extrabold text-green-700 mb-3">Embalagens Recicladas</p>
-                <p className="text-slate-600 text-lg leading-relaxed max-w-xl mx-auto md:mx-0">
-                  Cada garrafa PET ou embalagem reciclada significa menos poluição no meio ambiente e mais conscientização nas mãos das nossas crianças. É a <strong className="text-green-800">educação ambiental na prática</strong>.
-                </p>
+                <div>
+                  <h3 className="text-4xl sm:text-5xl font-black text-slate-900 mb-2">
+                    {loading ? '...' : (stats.totalContainers / 1000).toLocaleString('pt-BR', {maximumFractionDigits: 1})}k
+                  </h3>
+                  <p className="text-lg font-extrabold text-green-700 mb-2">Embalagens Recicladas</p>
+                  <p className="text-slate-600 text-sm leading-relaxed">
+                    Menos poluição no meio ambiente e mais <strong className="text-green-800">educação ambiental na prática</strong>.
+                  </p>
+                </div>
               </div>
             </div>
 
