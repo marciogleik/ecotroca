@@ -39,13 +39,21 @@ const ImpactPage: React.FC = () => {
   useEffect(() => {
     const fetchPublicStats = async () => {
       try {
-        const { count: studentCount } = await supabase.from('students').select('*', { count: 'exact', head: true });
-        const { count: vendorCount } = await supabase.from('vendors').select('*', { count: 'exact', head: true });
-        const { count: schoolCount } = await supabase.from('schools').select('*', { count: 'exact', head: true });
-        
-        const { data: deliveries } = await supabase.from('deliveries').select('ecotrocas_earned, containers, oil_liters');
-        const { data: schools } = await supabase.from('schools').select('total_received');
-        const { data: topSchoolsData } = await supabase.from('schools').select('id, name, total_received').order('total_received', { ascending: false }).limit(5);
+        const [
+          { count: studentCount },
+          { count: vendorCount },
+          { count: schoolCount },
+          { data: deliveries },
+          { data: schools },
+          { data: topSchoolsData }
+        ] = await Promise.all([
+          supabase.from('students').select('*', { count: 'exact', head: true }),
+          supabase.from('vendors').select('*', { count: 'exact', head: true }),
+          supabase.from('schools').select('*', { count: 'exact', head: true }),
+          supabase.from('deliveries').select('ecotrocas_earned, containers, oil_liters'),
+          supabase.from('schools').select('total_received'),
+          supabase.from('schools').select('id, name, total_received').order('total_received', { ascending: false }).limit(5)
+        ]);
 
         const totalIssued = schools?.reduce((acc, curr) => acc + (curr.total_received || 0), 0) || 0;
         const totalContainers = deliveries?.reduce((acc, curr) => acc + (curr.containers || 0), 0) || 0;
@@ -231,12 +239,12 @@ const ImpactPage: React.FC = () => {
                 </div>
                 <div>
                   <h3 className="text-4xl sm:text-5xl font-black text-slate-900 mb-2 flex items-baseline">
-                    {loading ? '...' : familiesImpacted.toLocaleString('pt-BR')}
+                    {familiesImpacted.toLocaleString('pt-BR')}
                     <span className="text-2xl font-bold text-slate-600 ml-2">+</span>
                   </h3>
                   <p className="text-lg font-extrabold text-slate-800 mb-2">Famílias Impactadas</p>
                   <p className="text-slate-600 text-sm leading-relaxed">
-                    Esforço de <strong>{loading ? '...' : stats.totalStudents} crianças</strong> levando alimento fresco para quem precisa.
+                    Esforço de <strong>{stats.totalStudents} crianças</strong> levando alimento fresco para quem precisa.
                   </p>
                 </div>
               </div>
@@ -256,7 +264,7 @@ const ImpactPage: React.FC = () => {
                 </div>
                 <div>
                   <h3 className="text-4xl sm:text-5xl font-black text-slate-900 mb-2">
-                    R$ {loading ? '...' : stats.totalIssued.toLocaleString('pt-BR', {minimumFractionDigits: 2})}
+                    R$ {stats.totalIssued.toLocaleString('pt-BR', {minimumFractionDigits: 2})}
                   </h3>
                   <p className="text-lg font-extrabold text-[#00A859] mb-2">Injetados na Economia</p>
                   <p className="text-slate-600 text-sm leading-relaxed">
@@ -275,7 +283,7 @@ const ImpactPage: React.FC = () => {
                 </div>
                 <div>
                   <h3 className="text-4xl sm:text-5xl font-black text-slate-900 mb-2 flex items-baseline">
-                    {loading ? '...' : stats.totalContainers.toLocaleString('pt-BR')}
+                    {stats.totalContainers.toLocaleString('pt-BR')}
                     <span className="text-xl sm:text-2xl font-bold text-green-800 ml-2">unidades</span>
                   </h3>
                   <p className="text-lg font-extrabold text-green-700 mb-2">Embalagens Recicladas</p>
