@@ -198,14 +198,17 @@ const NewsArticlePage: React.FC = () => {
           <div className="mt-20 flex justify-center">
             <button 
               onClick={() => {
+                const shareText = `Veja essa notícia do EcoTroca: ${article.title}\n\n${article.excerpt}\n\nLeia mais em: ${window.location.href}`;
+                
                 if (navigator.share) {
                   navigator.share({
                     title: article.title,
+                    text: `Veja essa notícia do EcoTroca: ${article.title}\n\n${article.excerpt}`,
                     url: window.location.href
                   });
                 } else {
-                  navigator.clipboard.writeText(window.location.href);
-                  alert('Link copiado para a área de transferência!');
+                  navigator.clipboard.writeText(shareText);
+                  alert('Texto e link copiados para a área de transferência!');
                 }
               }}
               className="inline-flex items-center gap-2 px-6 py-3 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl font-bold transition-colors"
