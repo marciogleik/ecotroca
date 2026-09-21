@@ -4,14 +4,23 @@ import { supabase } from '../lib/supabase';
 import { 
   Heart, 
   Recycle, 
-  Droplets, 
+ 
   Users,
   Sun,
   Menu,
   X,
   ArrowRight,
-  MapPin
+  MapPin,
+  Trophy,
+  Medal
 } from 'lucide-react';
+
+
+interface TopSchool {
+  id: string;
+  name: string;
+  total_received: number;
+}
 
 const ImpactPage: React.FC = () => {
   const [stats, setStats] = useState({
@@ -22,7 +31,9 @@ const ImpactPage: React.FC = () => {
     totalOil: 0,
     totalSchools: 0
   });
+  const [topSchools, setTopSchools] = useState<TopSchool[]>([]);
   const [loading, setLoading] = useState(true);
+
   const [isMenuOpen, setIsMenuOpen] = useState(false);
 
   useEffect(() => {
@@ -34,10 +45,14 @@ const ImpactPage: React.FC = () => {
         
         const { data: deliveries } = await supabase.from('deliveries').select('ecotrocas_earned, containers, oil_liters');
         const { data: schools } = await supabase.from('schools').select('total_received');
+        const { data: topSchoolsData } = await supabase.from('schools').select('id, name, total_received').order('total_received', { ascending: false }).limit(5);
 
         const totalIssued = schools?.reduce((acc, curr) => acc + (curr.total_received || 0), 0) || 0;
         const totalContainers = deliveries?.reduce((acc, curr) => acc + (curr.containers || 0), 0) || 0;
         const totalOil = deliveries?.reduce((acc, curr) => acc + (Number(curr.oil_liters) || 0), 0) || 0;
+
+        setTopSchools(topSchoolsData || []);
+
 
         setStats({
           totalStudents: studentCount || 0,
@@ -65,7 +80,6 @@ const ImpactPage: React.FC = () => {
     fetchPublicStats();
   }, []);
 
-  const waterPreserved = stats.totalOil * 25000;
   // Estimate families impacted assuming ~1.5 students per family
   const familiesImpacted = Math.round(stats.totalStudents * 0.8);
 
@@ -159,31 +173,27 @@ const ImpactPage: React.FC = () => {
         )}
       </header>
 
-      <main className="relative pt-20 pb-20 lg:pt-32 lg:pb-32">
+      <main className="relative pt-12 pb-20 lg:pt-16 lg:pb-32">
         <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-green-200/20 rounded-full blur-3xl -z-10 translate-x-1/2 -translate-y-1/4"></div>
         <div className="absolute bottom-0 left-0 w-[400px] h-[400px] bg-blue-200/10 rounded-full blur-3xl -z-10 -translate-x-1/2 translate-y-1/4"></div>
 
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           
-          <div className="max-w-4xl mx-auto text-center space-y-8 mb-24">
+          <div className="max-w-4xl mx-auto text-center space-y-4 mb-12">
             <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
-              <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white border border-slate-200 shadow-sm">
-                <Sun className="h-4 w-4 text-amber-500" />
-                <span className="text-xs font-bold text-slate-700 uppercase tracking-widest">Fazendo a Diferença Real</span>
+              <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-white border border-slate-200 shadow-sm">
+                <Sun className="h-3 w-3 text-amber-500" />
+                <span className="text-[10px] font-bold text-slate-700 uppercase tracking-widest">Fazendo a Diferença Real</span>
               </div>
-              <div className="inline-flex items-center gap-3 px-5 py-2 rounded-full bg-green-50 border border-green-200 shadow-sm">
-                <span className="text-xs font-bold text-green-700 uppercase tracking-widest">Patrocínio Oficial:</span>
-                <img src="/sicredi.png" alt="Sicredi" className="h-5 w-auto object-contain" />
+              <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-green-50 border border-green-200 shadow-sm">
+                <span className="text-[10px] font-bold text-green-700 uppercase tracking-widest">Patrocínio Oficial:</span>
+                <img src="/sicredi.png" alt="Sicredi" className="h-4 w-auto object-contain" />
               </div>
             </div>
             
-            <h1 className="text-5xl sm:text-6xl lg:text-7xl font-black tracking-tight leading-[1.1] text-slate-900">
+            <h1 className="text-3xl sm:text-4xl lg:text-5xl font-black tracking-tight leading-[1.1] text-slate-900">
               O Futuro de Água Boa está Sendo <span className="text-escola">Transformado</span> Hoje
             </h1>
-            
-            <p className="text-xl sm:text-2xl text-slate-600 font-medium leading-relaxed max-w-3xl mx-auto">
-              O EcoTroca não é apenas um programa de reciclagem. Com o <strong>apoio financeiro direto do Sicredi</strong>, é um <strong>movimento social poderoso</strong> que alimenta famílias, educa crianças e protege o meio ambiente.
-            </p>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 lg:gap-8 max-w-6xl mx-auto">
@@ -207,24 +217,7 @@ const ImpactPage: React.FC = () => {
               </div>
             </div>
 
-            {/* Água Preservada */}
-            <div className="relative group bg-white p-8 sm:p-10 rounded-[2.5rem] border border-slate-100 hover:border-blue-200 shadow-xl shadow-slate-200/40 hover:shadow-2xl hover:shadow-blue-500/10 transition-all duration-500">
-              <div className="absolute -bottom-10 -right-10 w-40 h-40 bg-blue-500/10 rounded-full blur-2xl group-hover:bg-blue-400/20 transition-all duration-500"></div>
-              <div className="relative z-10 space-y-6">
-                <div className="inline-flex p-3 rounded-2xl bg-blue-500/10 text-blue-700">
-                  <Droplets className="h-8 w-8" />
-                </div>
-                <div>
-                  <h3 className="text-4xl sm:text-5xl font-black text-slate-900 mb-2">
-                    {loading ? '...' : (waterPreserved / 1000000).toLocaleString('pt-BR', {minimumFractionDigits: 1, maximumFractionDigits: 1})}M
-                  </h3>
-                  <p className="text-xl font-extrabold text-blue-900 mb-2">Litros de Água Salvos</p>
-                  <p className="text-slate-600">
-                    O equivalente a {(waterPreserved / 2500000).toFixed(0)} piscinas olímpicas protegidas da contaminação do óleo de cozinha.
-                  </p>
-                </div>
-              </div>
-            </div>
+
 
             {/* Economia Solidária */}
             <div className="relative group bg-white p-8 sm:p-10 rounded-[2.5rem] border border-[#00A859]/20 hover:border-[#00A859]/50 shadow-xl shadow-slate-200/40 hover:shadow-2xl hover:shadow-[#00A859]/20 transition-all duration-500">
@@ -269,6 +262,60 @@ const ImpactPage: React.FC = () => {
               </div>
             </div>
 
+          </div>
+
+
+          {/* Ranking das Escolas */}
+          <div className="mt-20 max-w-4xl mx-auto">
+            <div className="text-center mb-8">
+              <div className="inline-flex items-center justify-center p-3 rounded-full bg-yellow-100 text-yellow-600 mb-4">
+                <Trophy className="h-8 w-8" />
+              </div>
+              <h2 className="text-3xl font-black text-slate-900 mb-4">Ranking de Engajamento das Escolas</h2>
+              <p className="text-slate-600 text-lg">
+                O sucesso do EcoTroca é movido pelas nossas crianças. Veja as escolas que mais se destacaram na arrecadação, mostrando que a educação ambiental começa na sala de aula e transforma a comunidade inteira!
+              </p>
+            </div>
+
+            <div className="bg-white rounded-3xl border border-slate-200 shadow-xl shadow-slate-200/40 overflow-hidden">
+              <div className="overflow-x-auto">
+                <table className="w-full text-left border-collapse">
+                  <thead>
+                    <tr className="bg-slate-50 border-b border-slate-200">
+                      <th className="py-4 px-6 font-bold text-slate-700 w-16 text-center">#</th>
+                      <th className="py-4 px-6 font-bold text-slate-700">Escola</th>
+                      <th className="py-4 px-6 font-bold text-slate-700 text-right">Total Arrecadado (R$)</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {loading ? (
+                      <tr>
+                        <td colSpan={3} className="py-8 text-center text-slate-500">Carregando ranking...</td>
+                      </tr>
+                    ) : topSchools.length > 0 ? (
+                      topSchools.map((school, index) => (
+                        <tr key={school.id} className="border-b border-slate-100 last:border-0 hover:bg-slate-50/80 transition-colors">
+                          <td className="py-4 px-6 text-center">
+                            {index === 0 && <Medal className="h-6 w-6 text-yellow-500 mx-auto" />}
+                            {index === 1 && <Medal className="h-6 w-6 text-slate-400 mx-auto" />}
+                            {index === 2 && <Medal className="h-6 w-6 text-amber-700 mx-auto" />}
+                            {index > 2 && <span className="text-slate-500 font-bold">{index + 1}º</span>}
+                          </td>
+                          <td className="py-4 px-6 font-semibold text-slate-800">{school.name}</td>
+                          <td className="py-4 px-6 font-bold text-[#00A859] text-right">
+                            {school.total_received.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}
+                          </td>
+                        </tr>
+                      ))
+                    ) : (
+                      <tr>
+                        <td colSpan={3} className="py-8 text-center text-slate-500">Nenhum dado encontrado.</td>
+                      </tr>
+                    )}
+                  </tbody>
+                </table>
+              </div>
+            </div>
           </div>
 
           <div className="mt-24 text-center max-w-3xl mx-auto">
