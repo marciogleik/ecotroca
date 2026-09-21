@@ -17,6 +17,7 @@ const NewsArticlePage: React.FC = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
 
   const article = newsData.find(item => item.slug === slug);
+  const recentNews = newsData.filter(item => item.slug !== slug).slice(0, 4);
 
   useEffect(() => {
     window.scrollTo(0, 0);
@@ -164,61 +165,93 @@ const NewsArticlePage: React.FC = () => {
         </div>
 
         {/* ────────────────────── ARTICLE BODY ────────────────────── */}
-        <article className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-16 sm:py-24">
-          
-          <div className="prose prose-lg prose-slate prose-a:text-escola hover:prose-a:text-green-700 max-w-none mb-16">
-            {article.content.map((paragraph, index) => (
-              <p 
-                key={index} 
-                className="text-lg sm:text-xl text-slate-700 leading-relaxed mb-6"
-                dangerouslySetInnerHTML={{ __html: paragraph }} 
-              />
-            ))}
-          </div>
-
-          {/* ────────────────────── GALLERY ────────────────────── */}
-          {article.gallery && article.gallery.length > 0 && (
-            <div className="mt-16 pt-16 border-t border-slate-100">
-              <h3 className="text-2xl font-black text-slate-900 mb-8 tracking-tight">Galeria de Fotos</h3>
-              <div className="grid grid-cols-2 md:grid-cols-3 gap-4 sm:gap-6">
-                {article.gallery.map((imgSrc, idx) => (
-                  <div key={idx} className="relative aspect-square rounded-2xl overflow-hidden shadow-sm bg-slate-100 group">
-                    <div className="absolute inset-0 bg-slate-900/10 group-hover:bg-transparent transition-colors duration-300 z-10"></div>
-                    <img 
-                      src={imgSrc} 
-                      alt={`Galeria - Imagem ${idx + 1}`} 
-                      className="w-full h-full object-cover transform group-hover:scale-110 transition-transform duration-700"
-                    />
-                  </div>
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 sm:py-24">
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-12 lg:gap-16">
+            
+            <article className="lg:col-span-2">
+              <div className="prose prose-lg prose-slate prose-a:text-escola hover:prose-a:text-green-700 max-w-none mb-16">
+                {article.content.map((paragraph, index) => (
+                  <p 
+                    key={index} 
+                    className="text-lg sm:text-xl text-slate-700 leading-relaxed mb-6"
+                    dangerouslySetInnerHTML={{ __html: paragraph }} 
+                  />
                 ))}
               </div>
-            </div>
-          )}
 
-          <div className="mt-20 flex justify-center">
-            <button 
-              onClick={() => {
-                const shareText = `Veja essa notícia do EcoTroca: ${article.title}\n\n${article.excerpt}\n\nLeia mais em: ${window.location.href}`;
-                
-                if (navigator.share) {
-                  navigator.share({
-                    title: article.title,
-                    text: `Veja essa notícia do EcoTroca: ${article.title}\n\n${article.excerpt}`,
-                    url: window.location.href
-                  });
-                } else {
-                  navigator.clipboard.writeText(shareText);
-                  alert('Texto e link copiados para a área de transferência!');
-                }
-              }}
-              className="inline-flex items-center gap-2 px-6 py-3 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl font-bold transition-colors"
-            >
-              <Share2 className="w-5 h-5" />
-              Compartilhar Notícia
-            </button>
+              {/* ────────────────────── GALLERY ────────────────────── */}
+              {article.gallery && article.gallery.length > 0 && (
+                <div className="mt-16 pt-16 border-t border-slate-100">
+                  <h3 className="text-2xl font-black text-slate-900 mb-8 tracking-tight">Galeria de Fotos</h3>
+                  <div className="grid grid-cols-2 md:grid-cols-3 gap-4 sm:gap-6">
+                    {article.gallery.map((imgSrc, idx) => (
+                      <div key={idx} className="relative aspect-square rounded-2xl overflow-hidden shadow-sm bg-slate-100 group">
+                        <div className="absolute inset-0 bg-slate-900/10 group-hover:bg-transparent transition-colors duration-300 z-10"></div>
+                        <img 
+                          src={imgSrc} 
+                          alt={`Galeria - Imagem ${idx + 1}`} 
+                          className="w-full h-full object-cover transform group-hover:scale-110 transition-transform duration-700"
+                        />
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              <div className="mt-20 flex justify-start">
+                <button 
+                  onClick={() => {
+                    const shareText = `Veja essa notícia do EcoTroca: ${article.title}\n\n${article.excerpt}\n\nLeia mais em: ${window.location.href}`;
+                    
+                    if (navigator.share) {
+                      navigator.share({
+                        title: article.title,
+                        text: `Veja essa notícia do EcoTroca: ${article.title}\n\n${article.excerpt}`,
+                        url: window.location.href
+                      });
+                    } else {
+                      navigator.clipboard.writeText(shareText);
+                      alert('Texto e link copiados para a área de transferência!');
+                    }
+                  }}
+                  className="inline-flex items-center gap-2 px-6 py-3 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl font-bold transition-colors"
+                >
+                  <Share2 className="w-5 h-5" />
+                  Compartilhar Notícia
+                </button>
+              </div>
+            </article>
+
+            {/* Sidebar */}
+            <aside className="lg:col-span-1">
+              <div className="sticky top-28 space-y-8">
+                <h3 className="text-xl font-black text-slate-900 border-b border-slate-200 pb-4">Últimas Notícias</h3>
+                <div className="space-y-6">
+                  {recentNews.map(news => (
+                    <Link key={news.slug} to={`/noticias/${news.slug}`} className="group flex gap-4 items-start">
+                      <div className="w-24 h-24 rounded-xl overflow-hidden shrink-0 bg-slate-100 shadow-sm border border-slate-200/60">
+                        <img src={news.coverImage} alt={news.title} className="w-full h-full object-cover transform group-hover:scale-110 transition-transform duration-500" />
+                      </div>
+                      <div className="flex-1">
+                        <div className="flex items-center gap-2 mb-1.5">
+                          <span className="text-[10px] font-bold text-escola uppercase tracking-wider">{news.category}</span>
+                        </div>
+                        <h4 className="text-sm font-bold text-slate-800 leading-snug group-hover:text-escola transition-colors line-clamp-3">
+                          {news.title}
+                        </h4>
+                        <div className="text-xs text-slate-500 mt-2 flex items-center gap-1 font-medium">
+                          <Calendar className="w-3 h-3" />
+                          {news.date}
+                        </div>
+                      </div>
+                    </Link>
+                  ))}
+                </div>
+              </div>
+            </aside>
+
           </div>
-
-        </article>
+        </div>
       </main>
 
       {/* ────────────────────── FOOTER ────────────────────── */}
