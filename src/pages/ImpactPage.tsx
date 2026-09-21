@@ -91,7 +91,7 @@ const ImpactPage: React.FC = () => {
             </div>
 
             <nav className="hidden md:flex items-center gap-8">
-              <Link to="/#noticias" className="text-sm font-semibold text-slate-600 hover:text-escola transition-colors">Notícias</Link>
+              <Link to="/noticias" className="text-sm font-semibold text-slate-600 hover:text-escola transition-colors">Notícias</Link>
               <Link to="/#como-funciona" className="text-sm font-semibold text-slate-600 hover:text-escola transition-colors">Como Funciona</Link>
               <Link 
                 to="/impacto" 
@@ -124,7 +124,7 @@ const ImpactPage: React.FC = () => {
           <div className="md:hidden border-b border-slate-100 bg-white">
             <div className="px-2 pt-2 pb-4 space-y-1 sm:px-3">
               <Link
-                to="/#noticias"
+                to="/noticias"
                 onClick={() => setIsMenuOpen(false)}
                 className="block px-4 py-3 rounded-xl text-base font-semibold text-slate-600 hover:bg-slate-50 hover:text-escola transition-colors"
               >
@@ -293,7 +293,7 @@ const ImpactPage: React.FC = () => {
             <div className="md:col-span-4 space-y-4">
               <h4 className="text-sm font-bold text-white uppercase tracking-wider">Acesso Rápido</h4>
               <ul className="space-y-2 text-sm columns-2">
-                <li><a href="/#noticias" className="hover:text-white transition-colors">Notícias</a></li>
+                <li><Link to="/noticias" className="hover:text-white transition-colors">Notícias</Link></li>
                 <li><a href="/#como-funciona" className="hover:text-white transition-colors">Como Funciona</a></li>
                 <li><Link to="/impacto" className="text-escola font-bold hover:text-green-400 transition-colors">Impacto Ecológico e Social Acumulado</Link></li>
                 <li><Link to="/login" className="hover:text-white transition-colors">Área Restrita</Link></li>
