@@ -354,7 +354,7 @@ const PublicPortal: React.FC = () => {
           <div className="max-w-5xl mx-auto bg-slate-50 rounded-3xl p-6 sm:p-8 lg:p-10 border border-slate-100 shadow-sm flex flex-col md:flex-row gap-8 items-center hover:shadow-md transition-shadow">
             <div className="w-full md:w-2/5 aspect-[4/3] rounded-2xl overflow-hidden relative shadow-sm">
               <img 
-                src="/news/Ecotroca1.jpeg" 
+                src="/news/Ecotroca5.jpeg" 
                 alt="Ação EcoTroca" 
                 className="w-full h-full object-cover transform hover:scale-105 transition-transform duration-700"
               />
