@@ -364,7 +364,7 @@ const PublicPortal: React.FC = () => {
                 </h3>
                 
                 <div className="text-base sm:text-lg text-slate-600 font-medium leading-relaxed space-y-4">
-                  <p>Mais de <strong>1.000 ecotrocas</strong> foram entregues hoje aos feirantes, dando continuidade às ações de educação ambiental e sustentabilidade desenvolvidas em nosso município.</p>
+                  <p>Mais de <strong>1.000 ecotrocas</strong> foram entregues no domingo 20/09/2026 aos feirantes, dando continuidade às ações de educação ambiental e sustentabilidade desenvolvidas em nosso município.</p>
                   
                   <p>Nesta etapa, contamos com a participação especial dos <strong>alunos da Escola Pestalozzi</strong>, que estiveram presentes na entrega e ajudaram a levar adiante essa iniciativa.</p>
                   
