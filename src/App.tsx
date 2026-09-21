@@ -6,6 +6,7 @@ import Layout from './components/Layout';
 import ProtectedRoute from './components/ProtectedRoute';
 import ImpactPage from './pages/ImpactPage';
 import NewsPage from './pages/NewsPage';
+import NewsArticlePage from './pages/NewsArticlePage';
 
 // Escola Pages
 import EscolaDashboard from './pages/escola/Dashboard';
@@ -124,6 +125,7 @@ function App() {
 
         <Route path="/impacto" element={<ImpactPage />} />
         <Route path="/noticias" element={<NewsPage />} />
+        <Route path="/noticias/:slug" element={<NewsArticlePage />} />
         <Route path="/" element={<PublicPortal />} />
       </Routes>
     </Router>

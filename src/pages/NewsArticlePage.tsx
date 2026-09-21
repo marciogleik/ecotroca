@@ -1,19 +1,44 @@
-import React, { useState } from 'react';
-import { Link } from 'react-router-dom';
+import React, { useState, useEffect } from 'react';
+import { useParams, Link, useNavigate } from 'react-router-dom';
 import { 
   Menu,
   X,
   ArrowRight,
+  ArrowLeft,
   MapPin,
-  Calendar
+  Calendar,
+  Share2
 } from 'lucide-react';
 import { newsData } from '../data/newsData';
 
-const NewsPage: React.FC = () => {
+const NewsArticlePage: React.FC = () => {
+  const { slug } = useParams<{ slug: string }>();
+  const navigate = useNavigate();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
 
+  const article = newsData.find(item => item.slug === slug);
+
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, [slug]);
+
+  if (!article) {
+    return (
+      <div className="min-h-screen bg-[#F8FAFC] flex flex-col items-center justify-center p-4">
+        <h2 className="text-2xl font-bold text-slate-800 mb-4">Notícia não encontrada</h2>
+        <button 
+          onClick={() => navigate('/noticias')}
+          className="inline-flex items-center text-escola font-bold hover:text-green-700"
+        >
+          <ArrowLeft className="mr-2 h-4 w-4" />
+          Voltar para Notícias
+        </button>
+      </div>
+    );
+  }
+
   return (
-    <div className="min-h-screen bg-[#F8FAFC] font-sans antialiased text-slate-800 flex flex-col">
+    <div className="min-h-screen bg-white font-sans antialiased text-slate-800 flex flex-col">
       
       {/* ────────────────────── HEADER ────────────────────── */}
       <header className="sticky top-0 z-50 bg-white/80 backdrop-blur-md border-b border-slate-100">
@@ -51,7 +76,6 @@ const NewsPage: React.FC = () => {
               </Link>
             </nav>
 
-            {/* Mobile Nav Button */}
             <div className="md:hidden">
               <button 
                 onClick={() => setIsMenuOpen(!isMenuOpen)}
@@ -102,63 +126,96 @@ const NewsPage: React.FC = () => {
         )}
       </header>
 
-      <main className="flex-1 relative pt-16 pb-20 lg:pt-24 lg:pb-32 bg-white">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center max-w-3xl mx-auto space-y-4 mb-20">
-            <span className="text-xs font-bold text-escola tracking-wider uppercase">Fique por Dentro</span>
-            <h1 className="text-4xl sm:text-5xl font-black text-slate-900 tracking-tight">
-              Portal de Notícias
-            </h1>
-            <p className="text-lg text-slate-500 font-medium leading-relaxed">
-              Acompanhe todas as atualizações, entregas e resultados do projeto EcoTroca na nossa comunidade.
-            </p>
-          </div>
+      <main className="flex-1">
+        {/* ────────────────────── HERO ARTICLE ────────────────────── */}
+        <div className="w-full bg-[#F8FAFC] pt-12 pb-20 border-b border-slate-200/60">
+          <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+            <Link 
+              to="/noticias" 
+              className="inline-flex items-center text-sm font-bold text-slate-500 hover:text-escola mb-8 transition-colors"
+            >
+              <ArrowLeft className="mr-2 h-4 w-4" />
+              Voltar para Notícias
+            </Link>
+            
+            <div className="flex flex-wrap items-center gap-3 mb-6">
+              <div className={`inline-flex items-center gap-2 px-4 py-2 rounded-full border shadow-sm ${article.categoryStyle}`}>
+                <span className="text-lg">{article.categoryIcon}</span>
+                <span className="text-xs font-bold uppercase tracking-widest">{article.category}</span>
+              </div>
+              <div className="flex items-center gap-2 text-sm text-slate-500 font-semibold">
+                <Calendar className="w-4 h-4" />
+                {article.date}
+              </div>
+            </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 sm:gap-10">
-            {newsData.map((news) => (
-              <Link 
-                key={news.id} 
-                to={`/noticias/${news.slug}`}
-                className="group flex flex-col bg-white rounded-3xl overflow-hidden border border-slate-100 shadow-sm hover:shadow-xl transition-all duration-300"
-              >
-                <div className="relative aspect-[4/3] overflow-hidden bg-slate-100">
-                  <div className="absolute inset-0 bg-slate-900/0 group-hover:bg-slate-900/10 transition-colors duration-300 z-10"></div>
-                  <img 
-                    src={news.coverImage} 
-                    alt={news.title}
-                    className="w-full h-full object-cover transform group-hover:scale-105 transition-transform duration-700"
-                  />
-                  <div className="absolute top-4 left-4 z-20">
-                    <div className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[10px] font-bold uppercase tracking-widest backdrop-blur-sm border shadow-sm ${news.categoryStyle.replace('bg-', 'bg-white/90 text-').split(' ')[0]} text-slate-800 border-white/50`}>
-                      <span className="text-sm leading-none">{news.categoryIcon}</span>
-                      {news.category}
-                    </div>
-                  </div>
-                </div>
-                
-                <div className="flex flex-col flex-1 p-6 sm:p-8">
-                  <div className="flex items-center gap-2 text-xs text-slate-400 font-semibold mb-4">
-                    <Calendar className="w-3.5 h-3.5" />
-                    {news.date}
-                  </div>
-                  
-                  <h3 className="text-xl sm:text-2xl font-black text-slate-900 tracking-tight leading-tight mb-4 group-hover:text-escola transition-colors">
-                    {news.title}
-                  </h3>
-                  
-                  <p className="text-sm text-slate-500 font-medium leading-relaxed line-clamp-3 mb-6">
-                    {news.excerpt}
-                  </p>
-                  
-                  <div className="mt-auto pt-4 border-t border-slate-100 flex items-center text-sm font-bold text-escola">
-                    Ler artigo completo
-                    <ArrowRight className="ml-2 h-4 w-4 transform group-hover:translate-x-1 transition-transform" />
-                  </div>
-                </div>
-              </Link>
-            ))}
+            <h1 className="text-4xl sm:text-5xl md:text-6xl font-black text-slate-900 tracking-tight leading-tight mb-8">
+              {article.title}
+            </h1>
+
+            <div className="aspect-video w-full rounded-3xl overflow-hidden shadow-xl border-4 border-white bg-slate-100">
+              <img 
+                src={article.coverImage} 
+                alt={article.title} 
+                className="w-full h-full object-cover"
+              />
+            </div>
           </div>
         </div>
+
+        {/* ────────────────────── ARTICLE BODY ────────────────────── */}
+        <article className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-16 sm:py-24">
+          
+          <div className="prose prose-lg prose-slate prose-a:text-escola hover:prose-a:text-green-700 max-w-none mb-16">
+            {article.content.map((paragraph, index) => (
+              <p 
+                key={index} 
+                className="text-lg sm:text-xl text-slate-700 leading-relaxed mb-6"
+                dangerouslySetInnerHTML={{ __html: paragraph }} 
+              />
+            ))}
+          </div>
+
+          {/* ────────────────────── GALLERY ────────────────────── */}
+          {article.gallery && article.gallery.length > 0 && (
+            <div className="mt-16 pt-16 border-t border-slate-100">
+              <h3 className="text-2xl font-black text-slate-900 mb-8 tracking-tight">Galeria de Fotos</h3>
+              <div className="grid grid-cols-2 md:grid-cols-3 gap-4 sm:gap-6">
+                {article.gallery.map((imgSrc, idx) => (
+                  <div key={idx} className="relative aspect-square rounded-2xl overflow-hidden shadow-sm bg-slate-100 group">
+                    <div className="absolute inset-0 bg-slate-900/10 group-hover:bg-transparent transition-colors duration-300 z-10"></div>
+                    <img 
+                      src={imgSrc} 
+                      alt={`Galeria - Imagem ${idx + 1}`} 
+                      className="w-full h-full object-cover transform group-hover:scale-110 transition-transform duration-700"
+                    />
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
+          <div className="mt-20 flex justify-center">
+            <button 
+              onClick={() => {
+                if (navigator.share) {
+                  navigator.share({
+                    title: article.title,
+                    url: window.location.href
+                  });
+                } else {
+                  navigator.clipboard.writeText(window.location.href);
+                  alert('Link copiado para a área de transferência!');
+                }
+              }}
+              className="inline-flex items-center gap-2 px-6 py-3 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl font-bold transition-colors"
+            >
+              <Share2 className="w-5 h-5" />
+              Compartilhar Notícia
+            </button>
+          </div>
+
+        </article>
       </main>
 
       {/* ────────────────────── FOOTER ────────────────────── */}
@@ -212,4 +269,4 @@ const NewsPage: React.FC = () => {
   );
 };
 
-export default NewsPage;
+export default NewsArticlePage;

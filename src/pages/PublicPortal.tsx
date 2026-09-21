@@ -379,7 +379,7 @@ const PublicPortal: React.FC = () => {
               
               <div className="pt-2">
                 <Link 
-                  to="/noticias" 
+                  to="/noticias/1000-ecotrocas-chegam-aos-feirantes" 
                   className="inline-flex items-center text-escola font-bold hover:text-green-700 transition-colors group"
                 >
                   Continuar lendo
