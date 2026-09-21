@@ -1,4 +1,5 @@
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import ScrollToTop from './components/ScrollToTop';
 import Login from './pages/Login';
 import PublicPortal from './pages/PublicPortal';
 import Cadastro from './pages/Cadastro';
@@ -33,6 +34,7 @@ import InviteManagement from './pages/prefeitura/InviteManagement';
 function App() {
   return (
     <Router>
+      <ScrollToTop />
       <Routes>
         <Route path="/login" element={<Login />} />
         <Route path="/cadastro" element={<Cadastro />} />
