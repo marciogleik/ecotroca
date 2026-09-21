@@ -231,7 +231,7 @@ const ImpactPage: React.FC = () => {
                 </div>
                 <div>
                   <h3 className="text-4xl sm:text-5xl font-black text-slate-900 mb-2">
-                    R$ {loading ? '...' : (stats.totalIssued / 1000).toLocaleString('pt-BR', {maximumFractionDigits: 0})}k
+                    R$ {loading ? '...' : stats.totalIssued.toLocaleString('pt-BR', {minimumFractionDigits: 2})}
                   </h3>
                   <p className="text-lg font-extrabold text-[#00A859] mb-2">Injetados na Economia</p>
                   <p className="text-slate-600 text-sm leading-relaxed">
@@ -250,7 +250,7 @@ const ImpactPage: React.FC = () => {
                 </div>
                 <div>
                   <h3 className="text-4xl sm:text-5xl font-black text-slate-900 mb-2">
-                    {loading ? '...' : (stats.totalContainers / 1000).toLocaleString('pt-BR', {maximumFractionDigits: 1})}k
+                    {loading ? '...' : stats.totalContainers.toLocaleString('pt-BR')}
                   </h3>
                   <p className="text-lg font-extrabold text-green-700 mb-2">Embalagens Recicladas</p>
                   <p className="text-slate-600 text-sm leading-relaxed">
